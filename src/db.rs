@@ -1,5 +1,8 @@
+use log::info;
+use rand;
 use rusqlite;
 use std::sync::mpsc;
+use std::time;
 
 #[derive(Debug)]
 pub struct Post {
@@ -9,9 +12,10 @@ pub struct Post {
     body: String,
 }
 
+#[derive(Debug)]
 pub struct Conn {
     db: rusqlite::Connection,
-    tx: mpsc::Sender<Cmd>,
+    rx: mpsc::Receiver<Cmd>,
 }
 
 #[derive(Debug)]
@@ -24,6 +28,8 @@ pub enum Cmd {
 
 impl Conn {
     fn init() -> rusqlite::Connection {
+        let start = time::Instant::now();
+        info!("Connecting to database");
         let conn = rusqlite::Connection::open_with_flags(
             "/tmp/db.sql",
             rusqlite::OpenFlags::SQLITE_OPEN_FULL_MUTEX
@@ -43,13 +49,18 @@ impl Conn {
         )
         .expect("Could not initialize DB");
 
+        info!(
+            "Database connection established in {}ms",
+            start.elapsed().as_millis()
+        );
+
         conn
     }
 
-    pub fn new(tx: mpsc::Sender<Cmd>) -> Self {
+    pub fn new(rx: mpsc::Receiver<Cmd>) -> Self {
         Conn {
             db: Conn::init(),
-            tx,
+            rx,
         }
     }
 }
@@ -66,6 +77,18 @@ impl Cmd {
 }
 
 impl Post {
+    pub fn new(title: &str, author: &str, body: &str) -> Self {
+        let id = rand::random::<u32>();
+        let title = title.to_string();
+        let author = author.to_string();
+        let body = body.to_string();
+        Post {
+            id,
+            title,
+            author,
+            body,
+        }
+    }
     pub fn id(&self) -> String {
         format!("{}", self.id)
     }
