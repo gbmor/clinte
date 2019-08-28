@@ -52,3 +52,16 @@ impl Conn {
         Conn { conn: Conn::init() }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let conn = Conn::init();
+        let mut stmt = conn.prepare("SELECT * FROM POSTS").unwrap();
+
+        stmt.query_map(rusqlite::NO_PARAMS, |row| Ok(()));
+    }
+}
