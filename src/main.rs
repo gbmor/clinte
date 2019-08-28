@@ -73,6 +73,7 @@ fn list_matches(db: &db::Conn) {
                 "{}. {} -> by {}\n{}",
                 post.id, post.title, post.author, post.body
             );
+            println!();
         }
     });
 }
