@@ -2,7 +2,7 @@ use log::info;
 use rusqlite;
 use std::time;
 
-const DB_PATH: &str = "/tmp/clinte.db";
+const DB_PATH: &str = "/usr/local/clinte/clinte.db";
 
 #[derive(Debug)]
 pub struct Post {
