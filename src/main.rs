@@ -111,4 +111,6 @@ fn post(db: &db::Conn) {
 
     stmt.execute_named(&[(":title", &title), (":author", &user), (":body", &body)])
         .unwrap();
+
+    println!();
 }
