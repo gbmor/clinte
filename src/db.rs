@@ -64,6 +64,6 @@ mod tests {
         let conn = Conn::init("/tmp/clinte-test.db");
         let mut stmt = conn.prepare("SELECT * FROM POSTS").unwrap();
 
-        stmt.query_map(rusqlite::NO_PARAMS, |row| Ok(()));
+        stmt.query_map(rusqlite::NO_PARAMS, |_| Ok(())).unwrap();
     }
 }

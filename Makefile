@@ -43,6 +43,15 @@ install:
 	@echo
 	@echo ...Done!
 
+.PHONY: test
+test:
+	@echo
+	@echo Running tests...
+	@echo
+	cargo test
+	@echo
+	@echo ...Done!
+
 .PHONY: uninstall
 uninstall:
 	@echo
