@@ -6,3 +6,4 @@ Limits:
 * Title -> 30 chars
 * Body -> 500 chars
 
+[![Screenshot](https://github.com/gbmor/clinte/blob/master/assets/clinte.png)](https://github.com/gbmor/clinte/blob/master/assets/clinte.png)
