@@ -13,7 +13,7 @@ fn main() {
         .version(clap::crate_version!())
         .author("Ben Morrison (gbmor)")
         .about("Command-line community notices system")
-        .subcommand(clap::SubCommand::with_name("list").about("Display notices"))
+        //.subcommand(clap::SubCommand::with_name("list").about("Display notices"))
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
         /*.subcommand(
             clap::SubCommand::with_name("update")
@@ -38,16 +38,14 @@ fn main() {
 
     info!("Startup completed in {:?}ms", start.elapsed().as_millis());
 
-    if let Some(_) = arg_matches.subcommand_matches("list") {
-        info!("Listing notes...");
-        list_matches(&db);
-        process::exit(0);
-    } else if let Some(_) = arg_matches.subcommand_matches("post") {
+    if let Some(_) = arg_matches.subcommand_matches("post") {
         info!("New post...");
         post(&db);
         list_matches(&db);
         process::exit(0);
     }
+
+    list_matches(&db);
 }
 
 fn list_matches(db: &db::Conn) {
