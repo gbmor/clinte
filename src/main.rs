@@ -92,7 +92,7 @@ fn post(db: &db::Conn) {
         &title[..30]
     } else {
         &title
-    }
+    };
 
     println!();
     println!("Body of the new post: ");
@@ -103,7 +103,7 @@ fn post(db: &db::Conn) {
         &body[..500]
     } else {
         &body
-    }
+    };
 
     let user = users::get_current_username()
         .unwrap()
