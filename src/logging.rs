@@ -38,11 +38,11 @@ mod tests {
     #[test]
     fn init_logs() {
         let blank = " ".bytes().collect::<Vec<u8>>();
-        fs::write("/tmp/dirtmud.log", &blank).unwrap();
+        fs::write("/tmp/clinte.log", &blank).unwrap();
         init();
 
         info!("TEST LOG MESSAGE");
-        let logfile = fs::read_to_string("/tmp/dirtmud.log").unwrap();
+        let logfile = fs::read_to_string("/tmp/clinte.log").unwrap();
         assert!(logfile.contains("TEST LOG MESSAGE"));
     }
 }
