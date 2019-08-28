@@ -1,0 +1,44 @@
+language: rust
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+os: 
+  - linux
+
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - libsqlcipher-dev
+      - libsqlcipher0
+      - cmake
+      - gcc
+      - binutils-dev
+      - libiberty-dev
+
+before_script:
+    - |
+      if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then
+        cargo install grcov;
+        export CARGO_INCREMENTAL=0;
+        export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads";
+      fi
+
+script:
+    - cargo build --verbose $CARGO_OPTIONS
+    - cargo test --verbose $CARGO_OPTIONS
+
+after_script:
+    - |
+      if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then
+        zip -0 ccov.zip `find . \( -name "clinte*.gc*" \) -print`;
+        grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore-dir "/*" -o lcov.info;
+        bash <(curl -s https://codecov.io/bash) -f lcov.info;
+      fi
