@@ -109,5 +109,6 @@ fn post(db: &db::Conn) {
         .into_string()
         .unwrap();
 
-    stmt.execute_named(&[(":title", &title), (":author", &user), (":body", &body)]);
+    stmt.execute_named(&[(":title", &title), (":author", &user), (":body", &body)])
+        .unwrap();
 }

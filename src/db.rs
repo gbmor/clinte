@@ -17,14 +17,6 @@ pub struct Conn {
     pub conn: rusqlite::Connection,
 }
 
-#[derive(Debug)]
-pub enum Cmd {
-    Create(Post),
-    Update(Post),
-    Disconnect,
-    NOOP,
-}
-
 impl Conn {
     fn init() -> rusqlite::Connection {
         let start = time::Instant::now();
@@ -58,31 +50,5 @@ impl Conn {
 
     pub fn new() -> Self {
         Conn { conn: Conn::init() }
-    }
-}
-
-impl Cmd {
-    pub fn new(txt: &str, post: Post) -> Self {
-        match txt {
-            "create" => Cmd::Create(post),
-            "update" => Cmd::Update(post),
-            "disconnect" => Cmd::Disconnect,
-            _ => Cmd::NOOP,
-        }
-    }
-}
-
-impl Post {
-    pub fn new(title: &str, author: &str, body: &str) -> Self {
-        let id = 0;
-        let title = title.to_string();
-        let author = author.to_string();
-        let body = body.to_string();
-        Post {
-            id,
-            title,
-            author,
-            body,
-        }
     }
 }
