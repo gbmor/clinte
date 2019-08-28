@@ -18,11 +18,11 @@ pub struct Conn {
 }
 
 impl Conn {
-    fn init() -> rusqlite::Connection {
+    fn init(path: &str) -> rusqlite::Connection {
         let start = time::Instant::now();
         info!("Connecting to database");
         let conn = rusqlite::Connection::open_with_flags(
-            DB_PATH,
+            path,
             rusqlite::OpenFlags::SQLITE_OPEN_FULL_MUTEX
                 | rusqlite::OpenFlags::SQLITE_OPEN_CREATE
                 | rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE,
@@ -49,7 +49,9 @@ impl Conn {
     }
 
     pub fn new() -> Self {
-        Conn { conn: Conn::init() }
+        Conn {
+            conn: Conn::init(DB_PATH),
+        }
     }
 }
 
@@ -59,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let conn = Conn::init();
+        let conn = Conn::init("/tmp/clinte-test.db");
         let mut stmt = conn.prepare("SELECT * FROM POSTS").unwrap();
 
         stmt.query_map(rusqlite::NO_PARAMS, |row| Ok(()));
