@@ -65,15 +65,23 @@ fn list_matches(db: &db::Conn) {
         })
         .unwrap();
 
+    let mut postvec = Vec::new();
     out.for_each(|row| {
         if let Ok(post) = row {
-            println!(
-                "{}. {} -> by {}\n{}",
+            postvec.push(format!(
+                "{}. {} -> by {}\n{}\n\n",
                 post.id, post.title, post.author, post.body
-            );
-            println!();
+            ));
         }
     });
+
+    for (i, e) in postvec.iter().enumerate() {
+        if postvec.len() >= 30 && i >= postvec.len() - 31 {
+            print!("{}", e);
+        } else if postvec.len() < 30 {
+            print!("{}", e);
+        }
+    }
 }
 
 fn post(db: &db::Conn) {
