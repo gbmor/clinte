@@ -5,7 +5,7 @@ Command-line community notice board. Post simple notes for other users to see.
 ## Features
 
 * Username is tagged based on the executing user
-* Shows the 30 most recent posts in descending order
+* Shows the 15 most recent posts in descending order
 * Able to go back and edit your own posts
 * Title <= 30 chars
 * Body <= 500 chars
@@ -44,6 +44,11 @@ $ sudo make install
 Issuing the program name itself will list
 the currently available posts, like in the screenshot above.
 
+To display the 15 most recent posts:
+```
+$ clinte
+```
+
 To make a new post:
 
 ```
@@ -61,6 +66,12 @@ $ clinte update
 `clinte` will ask for the ID number of the post. If it's been authored by you,
 then you will be asked for the new title and body after being shown the
 previous title and body.
+
+To delete a post:
+```
+$ clinte delete
+```
+Then `clinte` asks for the numeric ID of the post to delete.
 
 ## Contributing
 
