@@ -18,11 +18,11 @@ fn main() {
                 .about("Update a notice you've posted")
                 .arg(clap::Arg::with_name("id").help("Numeric ID of the post")),
         )
-        /*.subcommand(
+        .subcommand(
             clap::SubCommand::with_name("delete")
                 .about("Delete a notice you've posted")
                 .arg(clap::Arg::with_name("id").help("Numeric ID of the post")),
-        )*/
+        )
         .get_matches();
 
     let start = time::Instant::now();
@@ -42,6 +42,9 @@ fn main() {
     } else if arg_matches.subcommand_matches("update").is_some() {
         info!("Updating post ...");
         update(&db);
+    } else if arg_matches.subcommand_matches("delete").is_some() {
+        info!("Deleting post");
+        delete(&db);
     }
 
     list_matches(&db);
@@ -175,4 +178,35 @@ fn update(db: &db::Conn) {
     let body_stmt = format!("UPDATE posts SET body = :body WHERE id = {}", id_num_in);
     let mut stmt = db.conn.prepare(&body_stmt).unwrap();
     stmt.execute_named(&[(":body", &new_body)]).unwrap();
+}
+
+fn delete(db: &db::Conn) {
+    let cur_user = users::get_current_username()
+        .unwrap()
+        .into_string()
+        .unwrap();
+
+    println!();
+    println!("ID of the post to delete?");
+    let mut id_num_in = String::new();
+    io::stdin().read_line(&mut id_num_in).unwrap();
+    let id_num_in: u32 = id_num_in.trim().parse().unwrap();
+
+    let del_stmt = format!("DELETE FROM posts WHERE id = {}", id_num_in);
+    let get_stmt = format!("SELECT * FROM posts WHERE id = {}", id_num_in);
+
+    let mut get_stmt = db.conn.prepare(&get_stmt).unwrap();
+    let mut del_stmt = db.conn.prepare(&del_stmt).unwrap();
+
+    let user_in_post: String = get_stmt
+        .query_row(rusqlite::NO_PARAMS, |row| row.get(2))
+        .unwrap();
+
+    if cur_user != user_in_post {
+        println!("Users don't match. Can't delete!");
+        println!();
+        return;
+    }
+
+    del_stmt.execute(rusqlite::NO_PARAMS).unwrap();
 }
