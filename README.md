@@ -6,6 +6,7 @@ Command-line community notice board. Post simple notes for other users to see.
 
 * Username is tagged based on the executing user
 * Shows the 30 most recent posts in descending order
+* Able to go back and edit your own posts
 * Title <= 30 chars
 * Body <= 500 chars
 
