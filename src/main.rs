@@ -1,7 +1,6 @@
 use clap;
 use log::info;
 use std::io;
-use std::process;
 use std::time;
 use users;
 
@@ -40,8 +39,6 @@ fn main() {
     if arg_matches.subcommand_matches("post").is_some() {
         info!("New post...");
         post(&db);
-        list_matches(&db);
-        process::exit(0);
     }
 
     list_matches(&db);
