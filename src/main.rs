@@ -13,12 +13,12 @@ fn main() {
         .author("Ben Morrison (gbmor)")
         .about("Command-line community notices system")
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
-        /*.subcommand(
+        .subcommand(
             clap::SubCommand::with_name("update")
                 .about("Update a notice you've posted")
                 .arg(clap::Arg::with_name("id").help("Numeric ID of the post")),
         )
-        .subcommand(
+        /*.subcommand(
             clap::SubCommand::with_name("delete")
                 .about("Delete a notice you've posted")
                 .arg(clap::Arg::with_name("id").help("Numeric ID of the post")),
@@ -28,7 +28,7 @@ fn main() {
     let start = time::Instant::now();
     logging::init();
     info!("clinte starting up!");
-    println!("clinte-0.1-dev");
+    println!("clinte v{}", clap::crate_version!());
     println!("a community notices system");
     println!();
 
@@ -39,6 +39,9 @@ fn main() {
     if arg_matches.subcommand_matches("post").is_some() {
         info!("New post...");
         post(&db);
+    } else if arg_matches.subcommand_matches("update").is_some() {
+        info!("Updating post ...");
+        update(&db);
     }
 
     list_matches(&db);
@@ -115,4 +118,61 @@ fn post(db: &db::Conn) {
         .unwrap();
 
     println!();
+}
+
+fn update(db: &db::Conn) {
+    let cur_user = users::get_current_username()
+        .unwrap()
+        .into_string()
+        .unwrap();
+
+    println!();
+    println!("ID number of your post to edit?");
+    let mut id_num_in = String::new();
+    io::stdin().read_line(&mut id_num_in).unwrap();
+    let id_num_in: u32 = id_num_in.trim().parse().unwrap();
+
+    let mut get_stmt = db
+        .conn
+        .prepare("SELECT * FROM posts WHERE id = :id")
+        .unwrap();
+
+    let row = get_stmt
+        .query_row_named(&[(":id", &id_num_in)], |row| {
+            let title: String = row.get(1).unwrap();
+            let author = row.get(2).unwrap();
+            let body = row.get(3).unwrap();
+            Ok(vec![title, author, body])
+        })
+        .unwrap();
+
+    if cur_user != row[1] {
+        println!();
+        println!("Username mismatch - can't update post!");
+        return;
+    }
+
+    let mut new_title = String::new();
+    let mut new_body = String::new();
+
+    println!("Updating post {}", id_num_in);
+    println!();
+    println!("Title: {}\n\nBody: {}", row[0], row[2]);
+    println!();
+    println!("Enter new title:");
+    io::stdin().read_line(&mut new_title).unwrap();
+    println!();
+    println!("Enter new body:");
+    io::stdin().read_line(&mut new_body).unwrap();
+    println!();
+
+    let new_title = new_title.trim();
+    let new_body = new_body.trim();
+
+    let title_stmt = format!("UPDATE posts SET title = :title WHERE id = {}", id_num_in);
+    let mut stmt = db.conn.prepare(&title_stmt).unwrap();
+    stmt.execute_named(&[(":title", &new_title)]).unwrap();
+    let body_stmt = format!("UPDATE posts SET body = :body WHERE id = {}", id_num_in);
+    let mut stmt = db.conn.prepare(&body_stmt).unwrap();
+    stmt.execute_named(&[(":body", &new_body)]).unwrap();
 }
