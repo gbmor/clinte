@@ -210,15 +210,3 @@ fn delete(db: &db::Conn) {
 
     posts::exec_stmt_no_params(&mut del_stmt).unwrap();
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // Just a "Don't Panic" test
-    #[test]
-    fn display() {
-        let db = db::Conn::new();
-        list_matches(&db);
-    }
-}

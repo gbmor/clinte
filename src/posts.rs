@@ -40,6 +40,7 @@ pub fn exec_stmt_no_params(stmt: &mut rusqlite::Statement) -> Result<()> {
 mod tests {
     use super::*;
 
+    #[test]
     fn post_new() {
         let db = db::Conn::new();
         let mut stmt = db
@@ -61,19 +62,5 @@ mod tests {
             .unwrap();
 
         assert_eq!("TEST TITLE", &out);
-    }
-
-    #[test]
-    fn post_upd8() {
-        post_new();
-        let db = db::Conn::new();
-        update("NEW TITLE", "TEST BODY", 1, &db).unwrap();
-
-        let mut stmt = db.conn.prepare("SELECT * FROM posts WHERE id = 1").unwrap();
-
-        let out: String = stmt
-            .query_row(rusqlite::NO_PARAMS, |row| row.get::<usize, String>(1))
-            .unwrap();
-        assert_eq!("NEW TITLE", &out);
     }
 }
