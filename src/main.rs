@@ -90,7 +90,7 @@ fn list_matches(db: &db::Conn) {
     });
 
     for (i, e) in postvec.iter().enumerate() {
-        if (postvec.len() >= 30 && i >= postvec.len() - 31) || postvec.len() < 30 {
+        if (postvec.len() > 14 && i >= postvec.len() - 15) || postvec.len() < 15 {
             print!("{}", e);
         }
     }
