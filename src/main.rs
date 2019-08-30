@@ -70,8 +70,6 @@ fn list_matches(db: &db::Conn) {
             let title: String = row.get(1)?;
             let author: String = row.get(2)?;
             let body: String = row.get(3)?;
-            let title = str_to_utf8(&title);
-            let body = str_to_utf8(&body);
             Ok(db::Post {
                 id,
                 title,
@@ -108,7 +106,7 @@ fn post(db: &db::Conn) {
     println!("Title of the new post: ");
     let mut title = String::new();
     io::stdin().read_line(&mut title).unwrap();
-    let title = title.trim();
+    let title = str_to_utf8(title.trim());
     let title = if title.len() > 30 {
         &title[..30]
     } else {
@@ -119,7 +117,7 @@ fn post(db: &db::Conn) {
     println!("Body of the new post: ");
     let mut body = String::new();
     io::stdin().read_line(&mut body).unwrap();
-    let body = body.trim();
+    let body = str_to_utf8(body.trim());
     let body = if body.len() > 500 {
         &body[..500]
     } else {
