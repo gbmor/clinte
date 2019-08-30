@@ -18,8 +18,6 @@ Current build dependencies are as follows:
 
 * `rustc/cargo >= 1.36`
 * `libsqlite3-dev`
-* `git >= 2.20`
-* `GNU make ~= 4.2.1 (not tested with BSD make)`
 
 The installation for the build deps will vary based on your OS (`Linux, BSD`)
 
@@ -55,6 +53,14 @@ $ clinte post
 `clinte` will then ask for the title of the post, and the body. The username will be
 tagged automatically by your logged-in username, reflecting its intended use on
 multi-user UNIX-like systems.
+
+To edit a post:
+```
+$ clinte update
+```
+`clinte` will ask for the ID number of the post. If it's been authored by you,
+then you will be asked for the new title and body after being shown the
+previous title and body.
 
 ## Contributing
 
