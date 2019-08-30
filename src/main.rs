@@ -13,7 +13,6 @@ fn main() {
         .version(clap::crate_version!())
         .author("Ben Morrison (gbmor)")
         .about("Command-line community notices system")
-        //.subcommand(clap::SubCommand::with_name("list").about("Display notices"))
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
         /*.subcommand(
             clap::SubCommand::with_name("update")
@@ -38,7 +37,7 @@ fn main() {
 
     info!("Startup completed in {:?}ms", start.elapsed().as_millis());
 
-    if let Some(_) = arg_matches.subcommand_matches("post") {
+    if arg_matches.subcommand_matches("post").is_some() {
         info!("New post...");
         post(&db);
         list_matches(&db);
@@ -76,9 +75,7 @@ fn list_matches(db: &db::Conn) {
     });
 
     for (i, e) in postvec.iter().enumerate() {
-        if postvec.len() >= 30 && i >= postvec.len() - 31 {
-            print!("{}", e);
-        } else if postvec.len() < 30 {
+        if (postvec.len() >= 30 && i >= postvec.len() - 31) || postvec.len() < 30 {
             print!("{}", e);
         }
     }
