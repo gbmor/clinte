@@ -6,6 +6,7 @@ use users;
 
 mod db;
 mod logging;
+mod posts;
 
 fn main() {
     let arg_matches = clap::App::new("clinte")
@@ -124,13 +125,7 @@ fn post(db: &db::Conn) {
         &body
     };
 
-    let user = users::get_current_username()
-        .unwrap()
-        .into_string()
-        .unwrap();
-
-    stmt.execute_named(&[(":title", &title), (":author", &user), (":body", &body)])
-        .unwrap();
+    posts::new(&mut stmt, title, body).unwrap();
 
     println!();
 }
@@ -181,15 +176,7 @@ fn update(db: &db::Conn) {
     io::stdin().read_line(&mut new_body).unwrap();
     println!();
 
-    let new_title = new_title.trim();
-    let new_body = new_body.trim();
-
-    let title_stmt = format!("UPDATE posts SET title = :title WHERE id = {}", id_num_in);
-    let mut stmt = db.conn.prepare(&title_stmt).unwrap();
-    stmt.execute_named(&[(":title", &new_title)]).unwrap();
-    let body_stmt = format!("UPDATE posts SET body = :body WHERE id = {}", id_num_in);
-    let mut stmt = db.conn.prepare(&body_stmt).unwrap();
-    stmt.execute_named(&[(":body", &new_body)]).unwrap();
+    posts::update(&new_title, &new_body, id_num_in, &db).unwrap();
 }
 
 fn delete(db: &db::Conn) {
@@ -221,5 +208,17 @@ fn delete(db: &db::Conn) {
         return;
     }
 
-    del_stmt.execute(rusqlite::NO_PARAMS).unwrap();
+    posts::exec_stmt_no_params(&mut del_stmt).unwrap();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Just a "Don't Panic" test
+    #[test]
+    fn display() {
+        let db = db::Conn::new();
+        list_matches(&db);
+    }
 }
