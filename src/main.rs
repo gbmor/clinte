@@ -50,14 +50,28 @@ fn main() {
     list_matches(&db);
 }
 
+// Make sure nobody encodes narsty characters
+// into a message to negatively affect other
+// users
+fn str_to_utf8(str: &str) -> String {
+    str.chars()
+        .map(|c| {
+            let mut buf = [0; 4];
+            c.encode_utf8(&mut buf).to_string()
+        })
+        .collect::<String>()
+}
+
 fn list_matches(db: &db::Conn) {
     let mut stmt = db.conn.prepare("SELECT * FROM posts").unwrap();
     let out = stmt
         .query_map(rusqlite::NO_PARAMS, |row| {
-            let id = row.get(0)?;
-            let title = row.get(1)?;
-            let author = row.get(2)?;
-            let body = row.get(3)?;
+            let id: u32 = row.get(0)?;
+            let title: String = row.get(1)?;
+            let author: String = row.get(2)?;
+            let body: String = row.get(3)?;
+            let title = str_to_utf8(&title);
+            let body = str_to_utf8(&body);
             Ok(db::Post {
                 id,
                 title,
@@ -191,6 +205,7 @@ fn delete(db: &db::Conn) {
     let mut id_num_in = String::new();
     io::stdin().read_line(&mut id_num_in).unwrap();
     let id_num_in: u32 = id_num_in.trim().parse().unwrap();
+    println!();
 
     let del_stmt = format!("DELETE FROM posts WHERE id = {}", id_num_in);
     let get_stmt = format!("SELECT * FROM posts WHERE id = {}", id_num_in);
