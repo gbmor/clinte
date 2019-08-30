@@ -18,6 +18,8 @@ Current build dependencies are as follows:
 
 * `rustc/cargo >= 1.36`
 * `libsqlite3-dev`
+* `git >= 2.20`
+* `GNU make ~= 4.2.1 (not tested with BSD make)`
 
 The installation for the build deps will vary based on your OS (`Linux, BSD`)
 
