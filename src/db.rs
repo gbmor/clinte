@@ -18,7 +18,7 @@ pub struct Conn {
 }
 
 impl Conn {
-    fn init(path: &str) -> rusqlite::Connection {
+    pub fn init(path: &str) -> rusqlite::Connection {
         let start = time::Instant::now();
         info!("Connecting to database");
         let conn = rusqlite::Connection::open_with_flags(

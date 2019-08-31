@@ -42,7 +42,8 @@ mod tests {
 
     #[test]
     fn post_new() {
-        let db = db::Conn::new();
+        let db = db::Conn::init("/tmp/clinte.db");
+        let db = db::Conn { conn: db };
         let mut stmt = db
             .conn
             .prepare("INSERT INTO posts (title, author, body) VALUES (:title, :author, :body)")
@@ -51,16 +52,18 @@ mod tests {
         let title = String::from("TEST TITLE");
 
         new(&mut stmt, &title, "TEST BODY").unwrap();
+        update("NEW TITLE", "TEST BODY", 1, &db).unwrap();
 
         let mut stmt = db
             .conn
             .prepare("SELECT * FROM posts WHERE title = :title")
             .unwrap();
 
+        let title = String::from("NEW TITLE");
         let out: String = stmt
             .query_row_named(&[(":title", &title)], |row| row.get::<usize, String>(1))
             .unwrap();
 
-        assert_eq!("TEST TITLE", &out);
+        assert_eq!("NEW TITLE", &out);
     }
 }
