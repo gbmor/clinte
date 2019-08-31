@@ -15,6 +15,40 @@ pub fn new(stmt: &mut rusqlite::Statement, title: &str, body: &str) -> Result<()
     Ok(())
 }
 
+pub fn display(db: &db::Conn) {
+    let mut stmt = db.conn.prepare("SELECT * FROM posts").unwrap();
+    let out = stmt
+        .query_map(rusqlite::NO_PARAMS, |row| {
+            let id: u32 = row.get(0)?;
+            let title: String = row.get(1)?;
+            let author: String = row.get(2)?;
+            let body: String = row.get(3)?;
+            Ok(db::Post {
+                id,
+                title,
+                author,
+                body,
+            })
+        })
+        .unwrap();
+
+    let mut postvec = Vec::new();
+    out.for_each(|row| {
+        if let Ok(post) = row {
+            postvec.push(format!(
+                "{}. {} -> by {}\n{}\n\n",
+                post.id, post.title, post.author, post.body
+            ));
+        }
+    });
+
+    for (i, e) in postvec.iter().enumerate() {
+        if (postvec.len() > 14 && i >= postvec.len() - 15) || postvec.len() < 15 {
+            print!("{}", e);
+        }
+    }
+}
+
 pub fn update(new_title: &str, new_body: &str, id_num_in: u32, db: &db::Conn) -> Result<()> {
     let new_title = new_title.trim();
     let new_body = new_body.trim();

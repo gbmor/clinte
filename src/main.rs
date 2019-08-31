@@ -48,7 +48,7 @@ fn main() {
         delete(&db);
     }
 
-    list_matches(&db);
+    posts::display(&db);
 }
 
 // Make sure nobody encodes narsty characters
@@ -61,40 +61,6 @@ fn str_to_utf8(str: &str) -> String {
             c.encode_utf8(&mut buf).to_string()
         })
         .collect::<String>()
-}
-
-fn list_matches(db: &db::Conn) {
-    let mut stmt = db.conn.prepare("SELECT * FROM posts").unwrap();
-    let out = stmt
-        .query_map(rusqlite::NO_PARAMS, |row| {
-            let id: u32 = row.get(0)?;
-            let title: String = row.get(1)?;
-            let author: String = row.get(2)?;
-            let body: String = row.get(3)?;
-            Ok(db::Post {
-                id,
-                title,
-                author,
-                body,
-            })
-        })
-        .unwrap();
-
-    let mut postvec = Vec::new();
-    out.for_each(|row| {
-        if let Ok(post) = row {
-            postvec.push(format!(
-                "{}. {} -> by {}\n{}\n\n",
-                post.id, post.title, post.author, post.body
-            ));
-        }
-    });
-
-    for (i, e) in postvec.iter().enumerate() {
-        if (postvec.len() > 14 && i >= postvec.len() - 15) || postvec.len() < 15 {
-            print!("{}", e);
-        }
-    }
 }
 
 fn post(db: &db::Conn) {
