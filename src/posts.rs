@@ -1,11 +1,16 @@
-use crate::db;
-use rusqlite;
 use std::error::Error;
+use std::io;
+
+use rusqlite;
 use users;
+
+use crate::db;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
-pub fn new(stmt: &mut rusqlite::Statement, title: &str, body: &str) -> Result<()> {
+// Executes the sql statement that inserts a new post
+// Broken off for unit testing.
+pub fn exec_new(stmt: &mut rusqlite::Statement, title: &str, body: &str) -> Result<()> {
     let user = users::get_current_username()
         .unwrap()
         .into_string()
@@ -15,6 +20,53 @@ pub fn new(stmt: &mut rusqlite::Statement, title: &str, body: &str) -> Result<()
     Ok(())
 }
 
+// Make sure nobody encodes narsty characters
+// into a message to negatively affect other
+// users
+fn str_to_utf8(str: &str) -> String {
+    str.chars()
+        .map(|c| {
+            let mut buf = [0; 4];
+            c.encode_utf8(&mut buf).to_string()
+        })
+        .collect::<String>()
+}
+
+// First handler for creating a new post.
+pub fn create(db: &db::Conn) {
+    let mut stmt = db
+        .conn
+        .prepare("INSERT INTO posts (title, author, body) VALUES (:title, :author, :body)")
+        .unwrap();
+
+    println!();
+    println!("Title of the new post: ");
+    let mut title = String::new();
+    io::stdin().read_line(&mut title).unwrap();
+    let title = str_to_utf8(title.trim());
+    let title = if title.len() > 30 {
+        &title[..30]
+    } else {
+        &title
+    };
+
+    println!();
+    println!("Body of the new post: ");
+    let mut body = String::new();
+    io::stdin().read_line(&mut body).unwrap();
+    let body = str_to_utf8(body.trim());
+    let body = if body.len() > 500 {
+        &body[..500]
+    } else {
+        &body
+    };
+
+    exec_new(&mut stmt, title, body).unwrap();
+
+    println!();
+}
+
+// Shows the most recent posts.
 pub fn display(db: &db::Conn) {
     let mut stmt = db.conn.prepare("SELECT * FROM posts").unwrap();
     let out = stmt
@@ -49,6 +101,61 @@ pub fn display(db: &db::Conn) {
     }
 }
 
+// First handler to update posts.
+pub fn update_handler(db: &db::Conn, id: u32) {
+    let cur_user = users::get_current_username()
+        .unwrap()
+        .into_string()
+        .unwrap();
+
+    let id_num_in = if id == 0 {
+        println!();
+        println!("ID number of your post to edit?");
+        let mut id_num_in = String::new();
+        io::stdin().read_line(&mut id_num_in).unwrap();
+        id_num_in.trim().parse().unwrap()
+    } else {
+        id
+    };
+
+    let mut get_stmt = db
+        .conn
+        .prepare("SELECT * FROM posts WHERE id = :id")
+        .unwrap();
+
+    let row = get_stmt
+        .query_row_named(&[(":id", &id_num_in)], |row| {
+            let title: String = row.get(1).unwrap();
+            let author = row.get(2).unwrap();
+            let body = row.get(3).unwrap();
+            Ok(vec![title, author, body])
+        })
+        .unwrap();
+
+    if cur_user != row[1] {
+        println!();
+        println!("Username mismatch - can't update_handler post!");
+        return;
+    }
+
+    let mut new_title = String::new();
+    let mut new_body = String::new();
+
+    println!("Updating post {}", id_num_in);
+    println!();
+    println!("Title: {}\n\nBody: {}", row[0], row[2]);
+    println!();
+    println!("Enter new title:");
+    io::stdin().read_line(&mut new_title).unwrap();
+    println!();
+    println!("Enter new body:");
+    io::stdin().read_line(&mut new_body).unwrap();
+    println!();
+
+    update(&new_title, &new_body, id_num_in, &db).unwrap();
+}
+
+// Allows editing of posts - called by main::update
 pub fn update(new_title: &str, new_body: &str, id_num_in: u32, db: &db::Conn) -> Result<()> {
     let new_title = new_title.trim();
     let new_body = new_body.trim();
@@ -64,10 +171,48 @@ pub fn update(new_title: &str, new_body: &str, id_num_in: u32, db: &db::Conn) ->
     Ok(())
 }
 
+// Helper to just run a sql statement.
 pub fn exec_stmt_no_params(stmt: &mut rusqlite::Statement) -> Result<()> {
     stmt.execute(rusqlite::NO_PARAMS)?;
 
     Ok(())
+}
+
+// First handler to remove a post
+pub fn delete_handler(db: &db::Conn, id: u32) {
+    let cur_user = users::get_current_username()
+        .unwrap()
+        .into_string()
+        .unwrap();
+
+    let id_num_in: u32 = if id == 0 {
+        println!();
+        println!("ID of the post to delete?");
+        let mut id_num_in = String::new();
+        io::stdin().read_line(&mut id_num_in).unwrap();
+        id_num_in.trim().parse().unwrap()
+    } else {
+        id
+    };
+
+    let del_stmt = format!("DELETE FROM posts WHERE id = {}", id_num_in);
+    let get_stmt = format!("SELECT * FROM posts WHERE id = {}", id_num_in);
+
+    let mut get_stmt = db.conn.prepare(&get_stmt).unwrap();
+    let mut del_stmt = db.conn.prepare(&del_stmt).unwrap();
+
+    let user_in_post: String = get_stmt
+        .query_row(rusqlite::NO_PARAMS, |row| row.get(2))
+        .unwrap();
+
+    if cur_user != user_in_post {
+        println!();
+        println!("Users don't match. Can't delete!");
+        println!();
+        return;
+    }
+
+    exec_stmt_no_params(&mut del_stmt).unwrap();
 }
 
 #[cfg(test)]
@@ -85,7 +230,7 @@ mod tests {
 
         let title = String::from("TEST TITLE");
 
-        new(&mut stmt, &title, "TEST BODY").unwrap();
+        exec_new(&mut stmt, &title, "TEST BODY").unwrap();
         update("NEW TITLE", "TEST BODY", 1, &db).unwrap();
 
         let mut stmt = db

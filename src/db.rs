@@ -1,6 +1,7 @@
+use std::time;
+
 use log::info;
 use rusqlite;
-use std::time;
 
 const DB_PATH: &str = "/usr/local/clinte/clinte.db";
 
