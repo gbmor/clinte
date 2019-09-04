@@ -3,16 +3,11 @@ use std::fs::File;
 
 use chrono::offset::Utc;
 use simplelog::*;
-use users;
+
+use crate::user;
 
 lazy_static! {
-    static ref FILE: String = format!(
-        "/tmp/clinte_{}.log",
-        users::get_current_username()
-            .unwrap()
-            .into_string()
-            .unwrap()
-    );
+    static ref FILE: String = format!("/tmp/clinte_{}.log", *user::NAME);
 }
 
 pub fn init() {

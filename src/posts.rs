@@ -2,21 +2,20 @@ use std::error::Error;
 use std::io;
 
 use rusqlite;
-use users;
 
 use crate::db;
+use crate::user;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 // Executes the sql statement that inserts a new post
 // Broken off for unit testing.
 pub fn exec_new(stmt: &mut rusqlite::Statement, title: &str, body: &str) -> Result<()> {
-    let user = users::get_current_username()
-        .unwrap()
-        .into_string()
-        .unwrap();
-
-    stmt.execute_named(&[(":title", &title), (":author", &user), (":body", &body)])?;
+    stmt.execute_named(&[
+        (":title", &title),
+        (":author", &*user::NAME),
+        (":body", &body),
+    ])?;
     Ok(())
 }
 
@@ -103,11 +102,6 @@ pub fn display(db: &db::Conn) {
 
 // First handler to update posts.
 pub fn update_handler(db: &db::Conn, id: u32) {
-    let cur_user = users::get_current_username()
-        .unwrap()
-        .into_string()
-        .unwrap();
-
     let id_num_in = if id == 0 {
         println!();
         println!("ID number of your post to edit?");
@@ -132,7 +126,7 @@ pub fn update_handler(db: &db::Conn, id: u32) {
         })
         .unwrap();
 
-    if cur_user != row[1] {
+    if *user::NAME != row[1] {
         println!();
         println!("Username mismatch - can't update_handler post!");
         return;
@@ -180,11 +174,6 @@ pub fn exec_stmt_no_params(stmt: &mut rusqlite::Statement) -> Result<()> {
 
 // First handler to remove a post
 pub fn delete_handler(db: &db::Conn, id: u32) {
-    let cur_user = users::get_current_username()
-        .unwrap()
-        .into_string()
-        .unwrap();
-
     let id_num_in: u32 = if id == 0 {
         println!();
         println!("ID of the post to delete?");
@@ -205,7 +194,7 @@ pub fn delete_handler(db: &db::Conn, id: u32) {
         .query_row(rusqlite::NO_PARAMS, |row| row.get(2))
         .unwrap();
 
-    if cur_user != user_in_post {
+    if *user::NAME != user_in_post {
         println!();
         println!("Users don't match. Can't delete!");
         println!();

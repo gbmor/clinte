@@ -7,8 +7,10 @@ use clap;
 use log::info;
 
 mod db;
+mod ed;
 mod logging;
 mod posts;
+mod user;
 
 fn main() {
     let arg_matches = clap::App::new("clinte")
