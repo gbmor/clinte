@@ -8,6 +8,7 @@ use log::info;
 
 mod db;
 mod ed;
+mod error;
 mod logging;
 mod posts;
 mod user;

@@ -4,6 +4,7 @@ use std::io;
 use rusqlite;
 
 use crate::db;
+use crate::ed;
 use crate::user;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
@@ -50,10 +51,7 @@ pub fn create(db: &db::Conn) {
     };
 
     println!();
-    println!("Body of the new post: ");
-    let mut body = String::new();
-    io::stdin().read_line(&mut body).unwrap();
-    let body = str_to_utf8(body.trim());
+    let body = str_to_utf8(&ed::call());
     let body = if body.len() > 500 {
         &body[..500]
     } else {
