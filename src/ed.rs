@@ -25,7 +25,7 @@ lazy_static! {
 }
 
 fn create_tmp_file<'a>() -> Result<String, &'a str> {
-    let the_time = Utc::now().to_rfc2822();
+    let the_time = Utc::now().to_rfc3339();
     let file_name = format!("/tmp/clinte_ed_{}_{}", *user::NAME, the_time);
     match fs::write(&file_name, "") {
         Ok(_) => Ok(file_name),
