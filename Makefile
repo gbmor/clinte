@@ -38,7 +38,8 @@ install:
 	@echo
 	@echo Copying files...
 	install -m755 target/release/clinte $(BINDIR)
-	chmod 777 $(DBDIR)
+	touch $(DBDIR)/clinte.db
+	chmod 666 $(DBDIR)/clinte.db
 	@echo
 	@echo ...Done!
 
