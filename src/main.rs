@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use clap;
 use log::info;
 use std::io;
@@ -14,16 +17,8 @@ fn main() {
         .author("Ben Morrison (gbmor)")
         .about("Command-line community notices system")
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
-        .subcommand(
-            clap::SubCommand::with_name("update")
-                .about("Update a notice you've posted")
-                .arg(clap::Arg::with_name("id").help("Numeric ID of the post")),
-        )
-        .subcommand(
-            clap::SubCommand::with_name("delete")
-                .about("Delete a notice you've posted")
-                .arg(clap::Arg::with_name("id").help("Numeric ID of the post")),
-        )
+        .subcommand(clap::SubCommand::with_name("update").about("Update a notice you've posted"))
+        .subcommand(clap::SubCommand::with_name("delete").about("Delete a notice you've posted"))
         .get_matches();
 
     let start = time::Instant::now();
@@ -41,11 +36,21 @@ fn main() {
         info!("New post...");
         post(&db);
     } else if arg_matches.subcommand_matches("update").is_some() {
+        let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update") {
+            val.value_of("id").unwrap().parse().unwrap()
+        } else {
+            0
+        };
         info!("Updating post ...");
-        update(&db);
+        update(&db, id);
     } else if arg_matches.subcommand_matches("delete").is_some() {
+        let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update") {
+            val.value_of("id").unwrap().parse().unwrap()
+        } else {
+            0
+        };
         info!("Deleting post");
-        delete(&db);
+        delete(&db, id);
     }
 
     posts::display(&db);
@@ -96,17 +101,21 @@ fn post(db: &db::Conn) {
     println!();
 }
 
-fn update(db: &db::Conn) {
+fn update(db: &db::Conn, id: u32) {
     let cur_user = users::get_current_username()
         .unwrap()
         .into_string()
         .unwrap();
 
-    println!();
-    println!("ID number of your post to edit?");
-    let mut id_num_in = String::new();
-    io::stdin().read_line(&mut id_num_in).unwrap();
-    let id_num_in: u32 = id_num_in.trim().parse().unwrap();
+    let id_num_in = if id == 0 {
+        println!();
+        println!("ID number of your post to edit?");
+        let mut id_num_in = String::new();
+        io::stdin().read_line(&mut id_num_in).unwrap();
+        id_num_in.trim().parse().unwrap()
+    } else {
+        id
+    };
 
     let mut get_stmt = db
         .conn
@@ -145,18 +154,21 @@ fn update(db: &db::Conn) {
     posts::update(&new_title, &new_body, id_num_in, &db).unwrap();
 }
 
-fn delete(db: &db::Conn) {
+fn delete(db: &db::Conn, id: u32) {
     let cur_user = users::get_current_username()
         .unwrap()
         .into_string()
         .unwrap();
 
-    println!();
-    println!("ID of the post to delete?");
-    let mut id_num_in = String::new();
-    io::stdin().read_line(&mut id_num_in).unwrap();
-    let id_num_in: u32 = id_num_in.trim().parse().unwrap();
-    println!();
+    let id_num_in: u32 = if id == 0 {
+        println!();
+        println!("ID of the post to delete?");
+        let mut id_num_in = String::new();
+        io::stdin().read_line(&mut id_num_in).unwrap();
+        id_num_in.trim().parse().unwrap()
+    } else {
+        id
+    };
 
     let del_stmt = format!("DELETE FROM posts WHERE id = {}", id_num_in);
     let get_stmt = format!("SELECT * FROM posts WHERE id = {}", id_num_in);
@@ -169,6 +181,7 @@ fn delete(db: &db::Conn) {
         .unwrap();
 
     if cur_user != user_in_post {
+        println!();
         println!("Users don't match. Can't delete!");
         println!();
         return;

@@ -3,19 +3,28 @@ use std::fs::File;
 
 use chrono::offset::Utc;
 use simplelog::*;
+use users;
 
-pub const FILE: &str = "/tmp/clinte.log";
+lazy_static! {
+    static ref FILE: String = format!(
+        "/tmp/clinte_{}.log",
+        users::get_current_username()
+            .unwrap()
+            .into_string()
+            .unwrap()
+    );
+}
 
 pub fn init() {
     // If the log file exists on startup,
     // move and timestamp it so we get a
     // fresh log file.
-    if fs::metadata(FILE).is_ok() {
-        let mut newpath = FILE.to_string();
+    if fs::metadata(FILE.clone()).is_ok() {
+        let mut new_file = FILE.clone();
         let time = Utc::now().to_rfc3339();
-        newpath.push_str(".");
-        newpath.push_str(&time);
-        fs::rename(FILE, newpath).unwrap();
+        new_file.push_str(".");
+        new_file.push_str(&time);
+        fs::rename(FILE.clone(), new_file).unwrap();
     }
 
     CombinedLogger::init(vec![
@@ -23,7 +32,7 @@ pub fn init() {
         WriteLogger::new(
             LevelFilter::Info,
             Config::default(),
-            File::create(FILE).unwrap(),
+            File::create(FILE.clone()).unwrap(),
         ),
     ])
     .expect("Unable to initialize logging");
