@@ -47,5 +47,7 @@ pub fn call() -> String {
             .output(),
     );
 
-    error::helper(fs::read_to_string(tmp_loc))
+    let body = error::helper(fs::read_to_string(tmp_loc.clone()));
+    error::helper(fs::remove_file(tmp_loc));
+    body
 }
