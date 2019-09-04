@@ -1,6 +1,6 @@
 [package]
 name = "clinte"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Ben Morrison <ben@gbmor.dev>"]
 edition = "2018"
 

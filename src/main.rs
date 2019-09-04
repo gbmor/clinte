@@ -19,12 +19,8 @@ fn main() {
         .author("Ben Morrison (gbmor)")
         .about("Command-line community notices system")
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
-        .subcommand(
-            clap::SubCommand::with_name("update_handler").about("Update a notice you've posted"),
-        )
-        .subcommand(
-            clap::SubCommand::with_name("delete_handler").about("Delete a notice you've posted"),
-        )
+        .subcommand(clap::SubCommand::with_name("update").about("Update a notice you've posted"))
+        .subcommand(clap::SubCommand::with_name("delete").about("Delete a notice you've posted"))
         .get_matches();
 
     let start = time::Instant::now();
@@ -41,7 +37,7 @@ fn main() {
     if arg_matches.subcommand_matches("post").is_some() {
         info!("New post...");
         posts::create(&db);
-    } else if arg_matches.subcommand_matches("update_handler").is_some() {
+    } else if arg_matches.subcommand_matches("update").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
             val.value_of("id").unwrap().parse().unwrap()
         } else {
@@ -49,7 +45,7 @@ fn main() {
         };
         info!("Updating post ...");
         posts::update_handler(&db, id);
-    } else if arg_matches.subcommand_matches("delete_handler").is_some() {
+    } else if arg_matches.subcommand_matches("delete").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
             val.value_of("id").unwrap().parse().unwrap()
         } else {
