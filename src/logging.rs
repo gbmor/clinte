@@ -4,13 +4,14 @@ use std::fs::File;
 use chrono::offset::Utc;
 use simplelog::*;
 
+use crate::error;
 use crate::user;
 
 lazy_static! {
     static ref FILE: String = format!("/tmp/clinte_{}.log", *user::NAME);
 }
 
-pub fn init() {
+pub fn init() -> error::Result<()> {
     // If the log file exists on startup,
     // move and timestamp it so we get a
     // fresh log file.
@@ -19,7 +20,7 @@ pub fn init() {
         let time = Utc::now().to_rfc3339();
         new_file.push_str(".");
         new_file.push_str(&time);
-        fs::rename(FILE.clone(), new_file).unwrap();
+        fs::rename(FILE.clone(), new_file)?;
     }
 
     CombinedLogger::init(vec![
@@ -27,10 +28,12 @@ pub fn init() {
         WriteLogger::new(
             LevelFilter::Info,
             Config::default(),
-            File::create(FILE.clone()).unwrap(),
+            File::create(FILE.clone())?,
         ),
     ])
     .expect("Unable to initialize logging");
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -43,7 +46,7 @@ mod tests {
     fn init_logs() {
         let blank = " ".bytes().collect::<Vec<u8>>();
         fs::write(&*FILE, &blank).unwrap();
-        init();
+        init().unwrap();
 
         info!("TEST LOG MESSAGE");
         let logfile = fs::read_to_string(&*FILE).unwrap();

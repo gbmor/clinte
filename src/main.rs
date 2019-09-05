@@ -13,7 +13,7 @@ mod logging;
 mod posts;
 mod user;
 
-fn main() {
+fn main() -> error::Result<()> {
     let arg_matches = clap::App::new("clinte")
         .version(clap::crate_version!())
         .author("Ben Morrison (gbmor)")
@@ -24,7 +24,7 @@ fn main() {
         .get_matches();
 
     let start = time::Instant::now();
-    logging::init();
+    logging::init()?;
     info!("clinte starting up!");
     println!("clinte v{}", clap::crate_version!());
     println!("a community notices system");
@@ -36,24 +36,26 @@ fn main() {
 
     if arg_matches.subcommand_matches("post").is_some() {
         info!("New post...");
-        posts::create(&db);
+        posts::create(&db)?;
     } else if arg_matches.subcommand_matches("update").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            val.value_of("id").unwrap().parse().unwrap()
+            val.value_of("id").unwrap().parse()?
         } else {
             0
         };
         info!("Updating post ...");
-        posts::update_handler(&db, id);
+        posts::update_handler(&db, id)?;
     } else if arg_matches.subcommand_matches("delete").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            val.value_of("id").unwrap().parse().unwrap()
+            val.value_of("id").unwrap_or_else(|| "0").parse()?
         } else {
             0
         };
         info!("Deleting post");
-        posts::delete_handler(&db, id);
+        posts::delete_handler(&db, id)?;
     }
 
-    posts::display(&db);
+    posts::display(&db)?;
+
+    Ok(())
 }
