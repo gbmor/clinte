@@ -22,6 +22,7 @@ addons:
       - libiberty-dev
 
 script:
+    - cargo install cargo-tarpaulin
     - cargo build --verbose
     - cargo tarpaulin --out Xml
     - bash <(curl -s https://codecov.io/bash)
