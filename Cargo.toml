@@ -18,3 +18,12 @@ users = "^0.9"
 version = "^2.33"
 default-features = false
 features = [ "suggestions", "color" ]
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
+debug-assertions = false
+panic = 'abort'
+incremental = true
+overflow-checks = false
