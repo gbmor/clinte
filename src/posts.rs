@@ -81,7 +81,7 @@ pub fn display(db: &db::Conn) -> error::Result<()> {
     out.for_each(|row| {
         if let Ok(post) = row {
             postvec.push(format!(
-                "{}. {} -> by {}\n{}\n\n",
+                "{}. {} -> by {}\n{}\n",
                 post.id, post.title, post.author, post.body
             ));
         }
