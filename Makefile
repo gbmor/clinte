@@ -59,6 +59,5 @@ uninstall:
 	@echo
 	@echo Removing files
 	rm -f $(BINDIR)/clinte
-	rm -rf $(DBDIR)
 	@echo
 	@echo ...Done\!
