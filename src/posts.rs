@@ -48,14 +48,16 @@ pub fn create(db: &db::Conn) -> error::Result<()> {
     };
 
     println!();
-    let body = str_to_utf8(&ed::call());
-    let body = if body.len() > 500 {
-        &body[..500]
+    let body_raw = str_to_utf8(&ed::call());
+    let body = if body_raw.len() > 500 {
+        &body_raw[..500]
     } else {
-        &body
+        &body_raw
     };
 
-    exec_new(&mut stmt, title, body)?;
+    let trimmed_body = body.trim();
+
+    exec_new(&mut stmt, title, trimmed_body)?;
 
     println!();
     Ok(())
@@ -80,10 +82,14 @@ pub fn display(db: &db::Conn) -> error::Result<()> {
     let mut postvec = Vec::new();
     out.for_each(|row| {
         if let Ok(post) = row {
-            postvec.push(format!(
-                "{}. {} -> by {}\n{}\n",
-                post.id, post.title, post.author, post.body
-            ));
+            let newpost = format!(
+                "{}. {} -> by {}\n{}\n\n",
+                post.id,
+                post.title.trim(),
+                post.author,
+                post.body.trim()
+            );
+            postvec.push(newpost);
         }
     });
 
