@@ -22,7 +22,7 @@ addons:
       - libiberty-dev
 
 script:
-    - cargo install cargo-tarpaulin
+    - bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
     - cargo build --verbose
     - cargo tarpaulin --out Xml
     - bash <(curl -s https://codecov.io/bash)
