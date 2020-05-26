@@ -4,7 +4,6 @@ use std::time;
 extern crate lazy_static;
 
 use clap;
-use log::info;
 
 mod db;
 mod ed;
@@ -25,17 +24,17 @@ fn main() -> error::Result<()> {
 
     let start = time::Instant::now();
     logging::init()?;
-    info!("clinte starting up!");
+    log::info!("clinte starting up!");
     println!("clinte v{}", clap::crate_version!());
     println!("a community notices system");
     println!();
 
     let db = db::Conn::new();
 
-    info!("Startup completed in {:?}ms", start.elapsed().as_millis());
+    log::info!("Startup completed in {:?}ms", start.elapsed().as_millis());
 
     if arg_matches.subcommand_matches("post").is_some() {
-        info!("New post...");
+        log::info!("New post...");
         posts::create(&db)?;
     } else if arg_matches.subcommand_matches("update").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
@@ -43,7 +42,7 @@ fn main() -> error::Result<()> {
         } else {
             0
         };
-        info!("Updating post ...");
+        log::info!("Updating post ...");
         posts::update_handler(&db, id)?;
     } else if arg_matches.subcommand_matches("delete").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
@@ -51,7 +50,7 @@ fn main() -> error::Result<()> {
         } else {
             0
         };
-        info!("Deleting post");
+        log::info!("Deleting post");
         posts::delete_handler(&db, id)?;
     }
 

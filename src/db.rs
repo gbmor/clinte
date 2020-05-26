@@ -1,8 +1,5 @@
 use std::time;
 
-use log::info;
-use rusqlite;
-
 const DB_PATH: &str = "/usr/local/clinte/clinte.db";
 
 #[derive(Debug)]
@@ -21,7 +18,7 @@ pub struct Conn {
 impl Conn {
     pub fn init(path: &str) -> rusqlite::Connection {
         let start = time::Instant::now();
-        info!("Connecting to database");
+        log::info!("Connecting to database");
         let conn = rusqlite::Connection::open_with_flags(
             path,
             rusqlite::OpenFlags::SQLITE_OPEN_FULL_MUTEX
@@ -41,7 +38,7 @@ impl Conn {
         )
         .expect("Could not initialize DB");
 
-        info!(
+        log::info!(
             "Database connection established in {}ms",
             start.elapsed().as_millis()
         );

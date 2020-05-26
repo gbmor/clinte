@@ -2,7 +2,7 @@ use users;
 
 lazy_static! {
     pub static ref NAME: String = users::get_current_username()
-        .unwrap()
+        .expect("Could not get username")
         .into_string()
-        .unwrap();
+        .expect("Could not get username");
 }

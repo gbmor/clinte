@@ -3,7 +3,6 @@ use std::fs;
 use std::process;
 
 use chrono::prelude::*;
-use log;
 
 use crate::error;
 use crate::user;
