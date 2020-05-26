@@ -207,7 +207,7 @@ mod tests {
 
     #[test]
     fn post_new() {
-        let db = db::Conn::init("/tmp/clinte.db");
+        let db = db::Conn::init(":memory:");
         let db = db::Conn { conn: db };
         let mut stmt = db
             .conn

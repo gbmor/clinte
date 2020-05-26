@@ -23,7 +23,8 @@ fn main() -> error::Result<()> {
         .get_matches();
 
     let start = time::Instant::now();
-    logging::init()?;
+    let file = format!("/tmp/clinte_{}.log", *user::NAME);
+    logging::init(&file)?;
     log::info!("clinte starting up!");
     println!("clinte v{}", clap::crate_version!());
     println!("a community notices system");

@@ -3,11 +3,9 @@ use std::fs::OpenOptions;
 use simplelog::*;
 
 use crate::error;
-use crate::user;
 
-pub fn init() -> error::Result<()> {
-    let file = format!("/tmp/clinte_{}.log", *user::NAME);
-    let logfile = match OpenOptions::new().append(true).create(true).open(file) {
+pub fn init(path: &str) -> error::Result<()> {
+    let logfile = match OpenOptions::new().append(true).create(true).open(path) {
         Err(e) => {
             panic!("Could not open log file: {}", e);
         }
@@ -29,13 +27,15 @@ mod tests {
 
     #[test]
     fn init_logs() {
-        let file = format!("/tmp/clinte_{}.log", *user::NAME);
+        let file = "clinte_test.log";
         let blank = " ".bytes().collect::<Vec<u8>>();
         fs::write(&file, &blank).unwrap();
-        init().unwrap();
+        init("clinte_test.log").unwrap();
 
         log::info!("TEST LOG MESSAGE");
         let logfile = fs::read_to_string(&file).unwrap();
         assert!(logfile.contains("TEST LOG MESSAGE"));
+
+        fs::remove_file("clinte_test.log").unwrap();
     }
 }
