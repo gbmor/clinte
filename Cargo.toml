@@ -1,10 +1,19 @@
 [package]
 name = "clinte"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["Ben Morrison <ben@gbmor.dev>"]
 edition = "2018"
+description = "CLI note posting system for shared UNIX boxes."
+repository = "https://github.com/gbmor/clinte"
+readme = "README.md"
+keywords = ["social", "unix", "notes", "messages"]
+categories = ["command-line-utilities"]
+license = "ISC"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+travis-ci = { repository = "gbmor/clinte", branch = "master" }
+codecov = { repository = "gbmor/clinte", branch = "master", service = "github" }
+maintenance = { status = "stable" }
 
 [dependencies]
 chrono = "^0.4"
