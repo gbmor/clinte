@@ -51,7 +51,7 @@ pub fn create(db: &db::Conn) -> error::Result<()> {
 
     println!();
 
-    let body_raw = str_to_utf8(&ed::call());
+    let body_raw = str_to_utf8(&ed::call(""));
     let body = if body_raw.len() > 500 {
         &body_raw[..500]
     } else {
@@ -136,12 +136,12 @@ pub fn update_handler(db: &db::Conn, id: u32) -> error::Result<()> {
 
     println!("Updating post {}", id_num_in);
     println!();
-    println!("Title: {}\n\nBody: {}", row[0], row[2]);
+    println!("Current Title: {}", &row[0]);
     println!();
     println!("Enter new title:");
     io::stdin().read_line(&mut new_title)?;
 
-    let body_raw = str_to_utf8(&ed::call());
+    let body_raw = str_to_utf8(&ed::call(&row[2]));
     let body = if body_raw.len() > 500 {
         &body_raw[..500]
     } else {

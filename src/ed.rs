@@ -16,7 +16,7 @@ fn create_tmp_file<'a>() -> Result<String, std::io::Error> {
     }
 }
 
-pub fn call() -> String {
+pub fn call(body: &str) -> String {
     // If they don't have $EDITOR set, just default to nano
     // instead of assuming vim or emacs.
     let editor = match env::var("EDITOR") {
@@ -34,6 +34,11 @@ pub fn call() -> String {
     };
 
     let tmp_loc = error::helper(create_tmp_file(), "Couldn't create tempfile");
+
+    error::helper(
+        fs::write(&tmp_loc, body),
+        "Couldn't populate tempfile with message",
+    );
 
     error::helper(
         process::Command::new(editor)
