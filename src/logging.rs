@@ -2,19 +2,25 @@ use std::fs::OpenOptions;
 
 use simplelog::*;
 
+use crate::conf;
 use crate::error;
+use crate::user;
 
-pub fn init(path: &str) -> error::Result<()> {
-    let logfile = match OpenOptions::new().append(true).create(true).open(path) {
-        Err(e) => {
-            panic!("Could not open log file: {}", e);
+pub fn checked_init() {
+    let logfile = format!("/tmp/clinte_{}.log", *user::NAME);
+
+    if let Err(e) = init(&logfile) {
+        log::error!("Couldn't initialize logging. Exiting.");
+        if *conf::DEBUG {
+            log::error!("--> {}", e);
         }
-        Ok(f) => f,
-    };
-
-    if let Err(e) = WriteLogger::init(LevelFilter::Info, Config::default(), logfile) {
-        panic!("Could not initiate logging: {}", e);
+        std::process::exit(1);
     }
+}
+
+fn init(path: &str) -> error::Result<()> {
+    let logfile = OpenOptions::new().append(true).create(true).open(path)?;
+    WriteLogger::init(LevelFilter::Info, Config::default(), logfile)?;
 
     Ok(())
 }
