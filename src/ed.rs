@@ -7,7 +7,7 @@ use chrono::prelude::*;
 use crate::error;
 use crate::user;
 
-fn create_tmp_file<'a>() -> Result<String, std::io::Error> {
+fn create_tmp_file() -> Result<String, std::io::Error> {
     let the_time = Utc::now().to_rfc3339();
     let file_name = format!("/tmp/clinte_ed_{}_{}", *user::NAME, the_time);
     match fs::write(&file_name, "") {

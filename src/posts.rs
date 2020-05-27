@@ -1,7 +1,5 @@
 use std::io;
 
-use rusqlite;
-
 use crate::db;
 use crate::ed;
 use crate::error;
