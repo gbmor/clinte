@@ -15,7 +15,7 @@ mod user;
 fn main() -> error::Result<()> {
     let arg_matches = clap::App::new("clinte")
         .version(clap::crate_version!())
-        .author("Ben Morrison (gbmor)")
+        .author("Ben Morrison <ben@gbmor.dev>")
         .about("Command-line community notices system")
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
         .subcommand(clap::SubCommand::with_name("update").about("Update a notice you've posted"))
