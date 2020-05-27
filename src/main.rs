@@ -3,8 +3,7 @@ use std::time;
 #[macro_use]
 extern crate lazy_static;
 
-use clap;
-
+mod conf;
 mod db;
 mod ed;
 mod error;
@@ -13,18 +12,11 @@ mod posts;
 mod user;
 
 fn main() -> error::Result<()> {
-    let arg_matches = clap::App::new("clinte")
-        .version(clap::crate_version!())
-        .author("Ben Morrison <ben@gbmor.dev>")
-        .about("Command-line community notices system")
-        .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
-        .subcommand(clap::SubCommand::with_name("update").about("Update a notice you've posted"))
-        .subcommand(clap::SubCommand::with_name("delete").about("Delete a notice you've posted"))
-        .get_matches();
-
+    let arg_matches = &*conf::ARGS;
     let start = time::Instant::now();
-    let file = format!("/tmp/clinte_{}.log", *user::NAME);
-    logging::init(&file)?;
+    let logfile = format!("/tmp/clinte_{}.log", *user::NAME);
+    logging::init(&logfile)?;
+
     log::info!("clinte starting up!");
     println!("clinte v{}", clap::crate_version!());
     println!("a community notices system");
@@ -32,7 +24,9 @@ fn main() -> error::Result<()> {
 
     let db = db::Conn::new();
 
-    log::info!("Startup completed in {:?}ms", start.elapsed().as_millis());
+    if *conf::DEBUG {
+        log::info!("Startup completed in {:?}ms", start.elapsed().as_millis());
+    }
 
     if arg_matches.subcommand_matches("post").is_some() {
         log::info!("New post...");

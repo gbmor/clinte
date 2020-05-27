@@ -4,6 +4,7 @@ use std::process;
 
 use chrono::prelude::*;
 
+use crate::conf;
 use crate::error;
 use crate::user;
 
@@ -13,7 +14,10 @@ fn create_tmp_file<'a>() -> Result<String, &'a str> {
     match fs::write(&file_name, "") {
         Ok(_) => Ok(file_name),
         Err(err) => {
-            log::warn!("{:?}", err);
+            log::warn!("Couldn't create tempfile");
+            if *conf::DEBUG {
+                log::warn!("--> {:?}", err);
+            }
             Err("Unable to create temp file")
         }
     }
