@@ -17,7 +17,25 @@ fn get_config() -> clap::ArgMatches<'static> {
                 .help("Verbose logging"),
         )
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
-        .subcommand(clap::SubCommand::with_name("update").about("Update a notice you've posted"))
-        .subcommand(clap::SubCommand::with_name("delete").about("Delete a notice you've posted"))
+        .subcommand(
+            clap::SubCommand::with_name("update")
+                .about("Update a notice you've posted")
+                .arg(
+                    Arg::with_name("id")
+                        .help("Numeric ID of the post to update")
+                        .value_name("ID")
+                        .takes_value(true),
+                ),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("delete")
+                .about("Delete a notice you've posted")
+                .arg(
+                    Arg::with_name("id")
+                        .help("Numeric ID of the post to delete")
+                        .value_name("ID")
+                        .takes_value(true),
+                ),
+        )
         .get_matches()
 }

@@ -30,12 +30,9 @@ fn main() {
     if arg_matches.subcommand_matches("post").is_some() {
         log::info!("New post...");
         error::helper(posts::create(&db), "Error creating new post");
-    } else if arg_matches.subcommand_matches("update").is_some() {
-        let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            error::helper(
-                val.value_of("id").unwrap_or_else(|| "0").parse(),
-                "Couldn't parse ID",
-            )
+    } else if let Some(updmatch) = arg_matches.subcommand_matches("update") {
+        let id: u32 = if let Some(val) = updmatch.value_of("id") {
+            error::helper(val.parse(), "Couldn't parse ID")
         } else {
             0
         };
@@ -46,12 +43,9 @@ fn main() {
             posts::update_handler(&db, id),
             format!("Error updating post {}", id).as_ref(),
         );
-    } else if arg_matches.subcommand_matches("delete").is_some() {
-        let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            error::helper(
-                val.value_of("id").unwrap_or_else(|| "0").parse(),
-                "Couldn't parse ID",
-            )
+    } else if let Some(delmatch) = arg_matches.subcommand_matches("delete") {
+        let id: u32 = if let Some(val) = delmatch.value_of("id") {
+            error::helper(val.parse(), "Couldn't parse ID")
         } else {
             0
         };

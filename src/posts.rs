@@ -186,6 +186,7 @@ pub fn delete_handler(db: &db::Conn, id: u32) -> error::Result<()> {
         println!("ID of the post to delete?");
         let mut id_num_in = String::new();
         io::stdin().read_line(&mut id_num_in)?;
+        println!();
         id_num_in.trim().parse()?
     } else {
         id
@@ -207,7 +208,6 @@ pub fn delete_handler(db: &db::Conn, id: u32) -> error::Result<()> {
     }
 
     exec_stmt_no_params(&mut del_stmt)?;
-    println!();
     Ok(())
 }
 
