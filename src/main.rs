@@ -11,11 +11,10 @@ mod logging;
 mod posts;
 mod user;
 
-fn main() -> error::Result<()> {
+fn main() {
     let arg_matches = &*conf::ARGS;
     let start = time::Instant::now();
-    let logfile = format!("/tmp/clinte_{}.log", *user::NAME);
-    logging::init(&logfile)?;
+    logging::checked_init();
 
     log::info!("clinte starting up!");
     println!("clinte v{}", clap::crate_version!());
@@ -30,26 +29,63 @@ fn main() -> error::Result<()> {
 
     if arg_matches.subcommand_matches("post").is_some() {
         log::info!("New post...");
-        posts::create(&db)?;
+        if let Err(e) = posts::create(&db) {
+            log::error!("Error creating new post");
+            if *conf::DEBUG {
+                log::error!("--> {}", e);
+            }
+            std::process::exit(1);
+        }
     } else if arg_matches.subcommand_matches("update").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            val.value_of("id").unwrap().parse()?
+            match val.value_of("id").unwrap_or_else(|| "0").parse() {
+                Ok(n) => n,
+                Err(e) => {
+                    log::error!("Couldn't parse ID");
+                    if *conf::DEBUG {
+                        log::error!("--> {}", e);
+                    }
+                    std::process::exit(1);
+                }
+            }
         } else {
             0
         };
         log::info!("Updating post ...");
-        posts::update_handler(&db, id)?;
+        if let Err(e) = posts::update_handler(&db, id) {
+            log::error!("Error updating post {}", id);
+            if *conf::DEBUG {
+                log::error!("--> {}", e);
+            }
+            std::process::exit(1);
+        }
     } else if arg_matches.subcommand_matches("delete").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            val.value_of("id").unwrap_or_else(|| "0").parse()?
+            match val.value_of("id").unwrap_or_else(|| "0").parse() {
+                Ok(n) => n,
+                Err(_) => {
+                    log::error!("Couldn't parse ID");
+                    std::process::exit(1);
+                }
+            }
         } else {
             0
         };
         log::info!("Deleting post");
-        posts::delete_handler(&db, id)?;
+        if let Err(e) = posts::delete_handler(&db, id) {
+            log::error!("Error deleting post {}", id);
+            if *conf::DEBUG {
+                log::error!("--> {}", e);
+            }
+            std::process::exit(1);
+        }
     }
 
-    posts::display(&db)?;
-
-    Ok(())
+    if let Err(e) = posts::display(&db) {
+        log::error!("Error displaying posts");
+        if *conf::DEBUG {
+            log::error!("--> {}", e);
+        }
+        std::process::exit(1);
+    }
 }
