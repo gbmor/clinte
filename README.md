@@ -88,3 +88,8 @@ $ clinte -v [post|update|delete] [id]
 ```
 Use this flag if something's going wrong. Additional information will be written to
 `/tmp/clinte_$USER.log` that will, hopefully, reveal the cause of the error.
+
+## Notes
+
+`sqlite` expects the directory where the database lies to be writeable by the user. So, until I move this
+to using another storage medium (maybe plain text?), keep that in mind.
