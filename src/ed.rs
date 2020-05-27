@@ -4,22 +4,15 @@ use std::process;
 
 use chrono::prelude::*;
 
-use crate::conf;
 use crate::error;
 use crate::user;
 
-fn create_tmp_file<'a>() -> Result<String, &'a str> {
+fn create_tmp_file<'a>() -> Result<String, std::io::Error> {
     let the_time = Utc::now().to_rfc3339();
     let file_name = format!("/tmp/clinte_ed_{}_{}", *user::NAME, the_time);
     match fs::write(&file_name, "") {
         Ok(_) => Ok(file_name),
-        Err(err) => {
-            log::warn!("Couldn't create tempfile");
-            if *conf::DEBUG {
-                log::warn!("--> {:?}", err);
-            }
-            Err("Unable to create temp file")
-        }
+        Err(err) => Err(err),
     }
 }
 
@@ -40,7 +33,7 @@ pub fn call() -> String {
         }
     };
 
-    let tmp_loc = error::helper(create_tmp_file());
+    let tmp_loc = error::helper(create_tmp_file(), "Couldn't create tempfile");
 
     error::helper(
         process::Command::new(editor)
@@ -48,9 +41,13 @@ pub fn call() -> String {
             .stdin(process::Stdio::inherit())
             .stdout(process::Stdio::inherit())
             .output(),
+        "Couldn't call editor",
     );
 
-    let body = error::helper(fs::read_to_string(&tmp_loc));
-    error::helper(fs::remove_file(tmp_loc));
+    let body = error::helper(
+        fs::read_to_string(&tmp_loc),
+        "Couldn't read message from disk",
+    );
+    error::helper(fs::remove_file(tmp_loc), "Couldn't remove temporary file");
     body
 }

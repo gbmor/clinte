@@ -38,8 +38,10 @@ pub fn create(db: &db::Conn) -> error::Result<()> {
 
     println!();
     println!("Title of the new post: ");
+
     let mut title = String::new();
     io::stdin().read_line(&mut title)?;
+
     let title = str_to_utf8(title.trim());
     let title = if title.len() > 30 {
         &title[..30]
@@ -48,6 +50,7 @@ pub fn create(db: &db::Conn) -> error::Result<()> {
     };
 
     println!();
+
     let body_raw = str_to_utf8(&ed::call());
     let body = if body_raw.len() > 500 {
         &body_raw[..500]

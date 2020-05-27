@@ -29,63 +29,40 @@ fn main() {
 
     if arg_matches.subcommand_matches("post").is_some() {
         log::info!("New post...");
-        if let Err(e) = posts::create(&db) {
-            log::error!("Error creating new post");
-            if *conf::DEBUG {
-                log::error!("--> {}", e);
-            }
-            std::process::exit(1);
-        }
+        error::helper(posts::create(&db), "Error creating new post");
     } else if arg_matches.subcommand_matches("update").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            match val.value_of("id").unwrap_or_else(|| "0").parse() {
-                Ok(n) => n,
-                Err(e) => {
-                    log::error!("Couldn't parse ID");
-                    if *conf::DEBUG {
-                        log::error!("--> {}", e);
-                    }
-                    std::process::exit(1);
-                }
-            }
+            error::helper(
+                val.value_of("id").unwrap_or_else(|| "0").parse(),
+                "Couldn't parse ID",
+            )
         } else {
             0
         };
+
         log::info!("Updating post ...");
-        if let Err(e) = posts::update_handler(&db, id) {
-            log::error!("Error updating post {}", id);
-            if *conf::DEBUG {
-                log::error!("--> {}", e);
-            }
-            std::process::exit(1);
-        }
+
+        error::helper(
+            posts::update_handler(&db, id),
+            format!("Error updating post {}", id).as_ref(),
+        );
     } else if arg_matches.subcommand_matches("delete").is_some() {
         let id: u32 = if let Some(val) = arg_matches.subcommand_matches("update_handler") {
-            match val.value_of("id").unwrap_or_else(|| "0").parse() {
-                Ok(n) => n,
-                Err(_) => {
-                    log::error!("Couldn't parse ID");
-                    std::process::exit(1);
-                }
-            }
+            error::helper(
+                val.value_of("id").unwrap_or_else(|| "0").parse(),
+                "Couldn't parse ID",
+            )
         } else {
             0
         };
+
         log::info!("Deleting post");
-        if let Err(e) = posts::delete_handler(&db, id) {
-            log::error!("Error deleting post {}", id);
-            if *conf::DEBUG {
-                log::error!("--> {}", e);
-            }
-            std::process::exit(1);
-        }
+
+        error::helper(
+            posts::delete_handler(&db, id),
+            format!("Error deleting post {}", id).as_ref(),
+        );
     }
 
-    if let Err(e) = posts::display(&db) {
-        log::error!("Error displaying posts");
-        if *conf::DEBUG {
-            log::error!("--> {}", e);
-        }
-        std::process::exit(1);
-    }
+    error::helper(posts::display(&db), "Error displaying posts");
 }

@@ -2,20 +2,12 @@ use std::fs::OpenOptions;
 
 use simplelog::*;
 
-use crate::conf;
 use crate::error;
 use crate::user;
 
 pub fn checked_init() {
     let logfile = format!("/tmp/clinte_{}.log", *user::NAME);
-
-    if let Err(e) = init(&logfile) {
-        log::error!("Couldn't initialize logging. Exiting.");
-        if *conf::DEBUG {
-            log::error!("--> {}", e);
-        }
-        std::process::exit(1);
-    }
+    error::helper(init(&logfile), "Couldn't initialize logging");
 }
 
 fn init(path: &str) -> error::Result<()> {

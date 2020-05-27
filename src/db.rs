@@ -1,6 +1,7 @@
 use std::time;
 
 use crate::conf;
+use crate::error;
 
 const DB_PATH: &str = "/usr/local/clinte/clinte.db";
 
@@ -25,24 +26,28 @@ impl Conn {
             log::info!("Connecting to database");
         }
 
-        let conn = rusqlite::Connection::open_with_flags(
-            path,
-            rusqlite::OpenFlags::SQLITE_OPEN_FULL_MUTEX
-                | rusqlite::OpenFlags::SQLITE_OPEN_CREATE
-                | rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE,
-        )
-        .expect("Could not connect to DB");
+        let conn = error::helper(
+            rusqlite::Connection::open_with_flags(
+                path,
+                rusqlite::OpenFlags::SQLITE_OPEN_FULL_MUTEX
+                    | rusqlite::OpenFlags::SQLITE_OPEN_CREATE
+                    | rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE,
+            ),
+            "Could not connect to DB",
+        );
 
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS posts (
+        error::helper(
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY NOT NULL,
             title TEXT NOT NULL,
             author TEXT NOT NULL,
             body TEXT NOT NULL
         )",
-            rusqlite::NO_PARAMS,
-        )
-        .expect("Could not initialize DB");
+                rusqlite::NO_PARAMS,
+            ),
+            "Could not initialize DB",
+        );
 
         if *conf::DEBUG {
             log::info!(
