@@ -21,6 +21,7 @@ fn init(path: &str) -> error::Result<()> {
 mod tests {
     use super::*;
 
+    use crate::user;
     use std::fs;
 
     #[test]
@@ -35,5 +36,16 @@ mod tests {
         assert!(logfile.contains("TEST LOG MESSAGE"));
 
         fs::remove_file("clinte_test.log").unwrap();
+    }
+
+    #[test]
+    #[ignore]
+    fn checked_init_logs() {
+        checked_init();
+        log::info!("CHECKED INIT TEST");
+
+        let path = format!("/tmp/clinte_{}.log", *user::NAME);
+        let logfile = fs::read_to_string(&path).unwrap();
+        assert!(logfile.contains("CHECKED INIT TEST"));
     }
 }

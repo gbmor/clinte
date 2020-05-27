@@ -56,3 +56,16 @@ pub fn call(body: &str) -> String {
     error::helper(fs::remove_file(tmp_loc), "Couldn't remove temporary file");
     body
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tempfile() {
+        let name = create_tmp_file();
+        assert!(name.is_ok());
+        let name = name.unwrap();
+        fs::remove_file(name).unwrap();
+    }
+}
