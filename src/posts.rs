@@ -133,7 +133,6 @@ pub fn update_handler(db: &db::Conn, id: u32) -> error::Result<()> {
     }
 
     let mut new_title = String::new();
-    let mut new_body = String::new();
 
     println!("Updating post {}", id_num_in);
     println!();
@@ -141,12 +140,19 @@ pub fn update_handler(db: &db::Conn, id: u32) -> error::Result<()> {
     println!();
     println!("Enter new title:");
     io::stdin().read_line(&mut new_title)?;
-    println!();
-    println!("Enter new body:");
-    io::stdin().read_line(&mut new_body)?;
-    println!();
 
-    update(&new_title, &new_body, id_num_in, &db)?;
+    let body_raw = str_to_utf8(&ed::call());
+    let body = if body_raw.len() > 500 {
+        &body_raw[..500]
+    } else {
+        &body_raw
+    };
+
+    let trimmed_body = body.trim();
+
+    update(&new_title, &trimmed_body, id_num_in, &db)?;
+
+    println!();
     Ok(())
 }
 
@@ -201,6 +207,7 @@ pub fn delete_handler(db: &db::Conn, id: u32) -> error::Result<()> {
     }
 
     exec_stmt_no_params(&mut del_stmt)?;
+    println!();
     Ok(())
 }
 
