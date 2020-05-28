@@ -13,7 +13,7 @@ pub const PATH: &str = "clinte.json";
 #[cfg(not(test))]
 pub const PATH: &str = "/usr/local/clinte/clinte.json";
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Post {
     pub title: String,
     pub author: String,
@@ -62,8 +62,8 @@ impl Posts {
         self.posts[n] = post;
     }
 
-    pub fn get(&self, n: usize) -> &Post {
-        &self.posts[n]
+    pub fn get(&self, n: usize) -> Post {
+        self.posts[n].clone()
     }
 
     pub fn append(&mut self, post: Post) {
@@ -95,21 +95,51 @@ impl Posts {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::user;
 
     #[test]
-    fn test_init() {
-        let mut conn = Conn::init(PATH);
-        conn.conn.try_lock().unwrap();
-    }
-
-    #[test]
-    fn retrieve_posts_and_examine() {
-        let all = Posts::get_all(PATH);
+    fn retrieve_posts_and_crud() {
+        let mut all = Posts::get_all(PATH);
         assert_eq!(all.posts.len(), 1);
 
         let post = all.get(0);
         assert_eq!(post.title, "Welcome to CLI NoTEs!");
         assert_eq!(post.author, "clinte!");
         assert_eq!(post.body, "Welcome to clinte! For usage, run 'clinte -h'");
+
+        let user = &*user::NAME;
+
+        all.append(Post {
+            author: user.into(),
+            title: String::from("TITLE_HERE"),
+            body: String::from("BODY_HERE"),
+        });
+
+        all.write();
+        let mut all = Posts::get_all(PATH);
+
+        let post = all.get(1);
+        assert_eq!(post.title, "TITLE_HERE");
+        assert_eq!(post.author, *user);
+        assert_eq!(post.body, "BODY_HERE");
+
+        let post = Post {
+            author: user.into(),
+            title: "TITLE_GOES_HERE".into(),
+            body: "BODY_GOES_HERE".into(),
+        };
+
+        all.replace(1, post);
+
+        all.write();
+        let mut all = Posts::get_all(PATH);
+
+        let post = all.get(1);
+        assert_eq!(post.title, "TITLE_GOES_HERE");
+        assert_eq!(post.author, *user);
+        assert_eq!(post.body, "BODY_GOES_HERE");
+
+        all.delete(1);
+        all.write();
     }
 }
