@@ -22,7 +22,7 @@ pub struct Post {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Posts {
-    pub posts: Vec<Post>,
+    posts: Vec<Post>,
 }
 
 #[derive(Debug)]
@@ -89,6 +89,10 @@ impl Posts {
             fs::write(PATH, &strdata),
             "Couldn't write data to clinte.json",
         );
+    }
+
+    pub fn posts(&self) -> Vec<Post> {
+        self.posts.clone()
     }
 }
 

@@ -63,7 +63,7 @@ pub fn display() -> error::Result<()> {
     let all = db::Posts::get_all(db::PATH);
 
     let mut postvec = Vec::new();
-    all.posts.iter().enumerate().for_each(|(id, post)| {
+    all.posts().iter().enumerate().for_each(|(id, post)| {
         let newpost = format!(
             "{}. {} -> by {}\n{}\n\n",
             id + 1,
@@ -97,9 +97,14 @@ pub fn update_handler(id: usize) -> error::Result<()> {
 
     id_num_in -= 1;
 
+    #[cfg(not(test))]
     let user = &*user::NAME;
+
     let mut all = db::Posts::get_all(db::PATH);
     let post = all.get(id_num_in);
+
+    #[cfg(test)]
+    let user = &post.author;
 
     if *user != post.author {
         println!();
@@ -108,6 +113,10 @@ pub fn update_handler(id: usize) -> error::Result<()> {
         std::process::exit(1);
     }
 
+    #[cfg(test)]
+    let new_title = String::from("TEST_TITLE");
+
+    #[cfg(not(test))]
     let mut new_title = String::new();
 
     println!("Updating post {}", id_num_in);
@@ -115,9 +124,16 @@ pub fn update_handler(id: usize) -> error::Result<()> {
     println!("Current Title: {}", post.title);
     println!();
     println!("Enter new title:");
+
+    #[cfg(not(test))]
     io::stdin().read_line(&mut new_title)?;
 
+    #[cfg(test)]
+    let body_raw = String::from("TEST_BODY");
+
+    #[cfg(not(test))]
     let body_raw = str_to_utf8(&ed::call(&post.body));
+
     let body = if body_raw.len() > 500 {
         &body_raw[..500]
     } else {
@@ -170,4 +186,34 @@ pub fn delete_handler(id: usize) -> error::Result<()> {
     all.write();
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::fs;
+
+    #[test]
+    fn test_str_to_utf8() {
+        let lhs = "foobar";
+        let rhs = str_to_utf8(lhs);
+        assert_eq!(lhs, rhs);
+    }
+
+    #[test]
+    fn display_doesnt_explode() {
+        assert!(display().is_ok());
+    }
+
+    #[test]
+    fn test_update_handler() {
+        fs::copy(db::PATH, "clinte_bak.json").unwrap();
+        update_handler(1).unwrap();
+        let all = db::Posts::get_all(db::PATH);
+        let post = all.get(0);
+        assert_eq!(post.title, "TEST_TITLE");
+        assert_eq!(post.body, "TEST_BODY");
+        fs::rename("clinte_bak.json", db::PATH).unwrap();
+    }
 }

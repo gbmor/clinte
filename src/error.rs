@@ -14,7 +14,8 @@ where
             if *conf::DEBUG {
                 log::error!("--> {:?}", err);
             }
-            std::process::exit(1);
+            //std::process::exit(1);
+            panic!("{:?}", err);
         }
     }
 }
