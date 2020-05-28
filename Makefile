@@ -51,7 +51,7 @@ upgrade:
 .PHONY: test
 test:
 	@printf "\n%s\n" "Running tests..."
-	cargo test
+	RUST_TEST_THREADS=1 cargo test
 	@printf "\n%s\n" "...Done!"
 
 .PHONY: uninstall
