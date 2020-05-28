@@ -1,0 +1,9 @@
+{
+    "posts": [
+        {
+            "title": "Welcome to CLI NoTEs!",
+            "author": "clinte!",
+            "body": "Welcome to clinte! For usage, run 'clinte -h'"
+        }
+    ]
+}

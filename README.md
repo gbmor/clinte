@@ -1,27 +1,22 @@
 # clinte &nbsp; [![Build Status](https://travis-ci.com/gbmor/clinte.svg?branch=master)](https://travis-ci.com/gbmor/clinte) [![codecov](https://codecov.io/gh/gbmor/clinte/branch/master/graph/badge.svg)](https://codecov.io/gh/gbmor/clinte)
 
-Command-line community notice board. Post text-only notes for other users to see.
+Command-line community notice board for public-access UNIX systems. Post text-only notes for other users to see.
 
 ## Features
 
 - Username is tagged based on the executing user
 - Shows the 15 most recent posts in descending order
-- Able to go back and edit your own posts
+- Able to edit or delete your own posts
 - Title <= 30 chars
 - Body <= 500 chars
 - Calls `$EDITOR` when creating or modifying the body of a post
 - If `$EDITOR` is unset, calls `nano`
+- Stores posts in JSON
+- Uses advisory locking via `flock(2)` to synchronize access to the posts file
 
 [![Screenshot](https://github.com/gbmor/clinte/blob/master/assets/clinte.png)](https://github.com/gbmor/clinte/blob/master/assets/clinte.png)
 
 ## Installation
-
-Current build dependencies are as follows:
-
-- `rust >= 1.36`
-- `libsqlite3-dev`
-
-The installation for the build deps will vary based on your OS (`Linux, BSD`)
 
 Clone the repository and jump into the directory:
 
@@ -29,7 +24,6 @@ Clone the repository and jump into the directory:
 $ git clone git://github.com/gbmor/clinte.git
 ...
 $ cd clinte
-$ git checkout $(git describe --tags --abbrev=0)
 ```
 
 Run the makefile and install:
@@ -41,6 +35,32 @@ $ make
 
 $ sudo make install
 ```
+
+`make` will automatically checkout the latest tag and build from there.
+
+## Upgrading
+
+**Note:** v1.0.0 used sqlite3, which presented some issues. v2.0.0 uses a json structure for posts,
+as this will be safer on a multi-user system. When upgrading from v1.0.0 to v2.0.0, you won't be
+able to save your posts without using a third-party tool to dump the `posts` table to json, and
+manually adjusting it to fit the expected format (which can be seen in the included `clinte.json`).
+
+*If upgrading from v1.0.0 -> v2.0.0, do a fresh install. The following applies to upgrading when
+already running at least v2.0.0*
+
+```
+$ make update
+$ make
+$ make upgrade
+```
+
+This will:
+
+* checkout `master`
+* pull / rebase changes from upstream
+* checkout the latest tag
+* rebuild
+* replace the `clinte` binary, but leave the posts file untouched.
 
 ## Usage
 
@@ -91,5 +111,4 @@ Use this flag if something's going wrong. Additional information will be written
 
 ## Notes
 
-`sqlite` expects the directory where the database lies to be writeable by the user. So, until I move this
-to using another storage medium (maybe plain text?), keep that in mind.
+The file where the posts are stored must be writeable by all users on the system. Keep this in mind.

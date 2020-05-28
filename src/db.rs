@@ -1,68 +1,94 @@
-use std::time;
+use fd_lock::FdLock;
+use serde::{Deserialize, Serialize};
+
+use std::fs;
+use std::fs::File;
 
 use crate::conf;
 use crate::error;
 
-const DB_PATH: &str = "/usr/local/clinte/clinte.db";
+#[cfg(test)]
+pub const PATH: &str = "clinte.json";
 
-#[derive(Debug)]
+#[cfg(not(test))]
+pub const PATH: &str = "/usr/local/clinte/clinte.json";
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Post {
-    pub id: u32,
     pub title: String,
     pub author: String,
     pub body: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Posts {
+    pub posts: Vec<Post>,
+}
+
 #[derive(Debug)]
 pub struct Conn {
-    pub conn: rusqlite::Connection,
+    pub conn: FdLock<std::fs::File>,
 }
 
 impl Conn {
-    pub fn init(path: &str) -> rusqlite::Connection {
-        let start = time::Instant::now();
-
+    pub fn init(path: &str) -> Self {
         if *conf::DEBUG {
-            log::info!("Connecting to database");
+            log::info!("Opening clinte.json");
         }
 
-        let conn = error::helper(
-            rusqlite::Connection::open_with_flags(
-                path,
-                rusqlite::OpenFlags::SQLITE_OPEN_FULL_MUTEX
-                    | rusqlite::OpenFlags::SQLITE_OPEN_CREATE
-                    | rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE,
-            ),
-            "Could not connect to DB",
-        );
+        let file = error::helper(File::open(path), "Couldn't open clinte.json");
 
-        error::helper(
-            conn.execute(
-                "CREATE TABLE IF NOT EXISTS posts (
-            id INTEGER PRIMARY KEY NOT NULL,
-            title TEXT NOT NULL,
-            author TEXT NOT NULL,
-            body TEXT NOT NULL
-        )",
-                rusqlite::NO_PARAMS,
-            ),
-            "Could not initialize DB",
-        );
+        Self {
+            conn: FdLock::new(file),
+        }
+    }
+}
 
+impl Posts {
+    pub fn get_all(path: &str) -> Self {
         if *conf::DEBUG {
-            log::info!(
-                "Database connection established in {}ms",
-                start.elapsed().as_millis()
-            );
+            log::info!("Retrieving posts...");
         }
 
-        conn
+        let mut db = Conn::init(path);
+        let _guard = error::helper(db.conn.try_lock(), "Couldn't acquire lock on clinte.json");
+        let strdata = error::helper(fs::read_to_string(PATH), "Couldn't read clinte.json");
+        let out: Self = error::helper(serde_json::from_str(&strdata), "Couldn't parse clinte.json");
+
+        out
     }
 
-    pub fn new() -> Self {
-        Conn {
-            conn: Conn::init(DB_PATH),
-        }
+    pub fn replace(&mut self, n: usize, post: Post) {
+        self.posts[n] = post;
+    }
+
+    pub fn get(&self, n: usize) -> &Post {
+        &self.posts[n]
+    }
+
+    pub fn append(&mut self, post: Post) {
+        self.posts.push(post);
+    }
+
+    pub fn delete(&mut self, n: usize) {
+        self.posts.remove(n);
+    }
+
+    pub fn write(&self) {
+        let strdata = error::helper(
+            serde_json::to_string_pretty(&self),
+            "Couldn't serialize posts",
+        );
+
+        let mut db_fd = Conn::init(PATH);
+        let _guard = error::helper(
+            db_fd.conn.try_lock(),
+            "Couldn't acquire lock on clinte.json",
+        );
+        error::helper(
+            fs::write(PATH, &strdata),
+            "Couldn't write data to clinte.json",
+        );
     }
 }
 
@@ -71,10 +97,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_new() {
-        let conn = Conn::init(":memory:");
-        let mut stmt = conn.prepare("SELECT * FROM POSTS").unwrap();
+    fn test_init() {
+        let mut conn = Conn::init(PATH);
+        conn.conn.try_lock().unwrap();
+    }
 
-        stmt.query_map(rusqlite::NO_PARAMS, |_| Ok(())).unwrap();
+    #[test]
+    fn retrieve_posts_and_examine() {
+        let all = Posts::get_all(PATH);
+        assert_eq!(all.posts.len(), 1);
+
+        let post = all.get(0);
+        assert_eq!(post.title, "Welcome to CLI NoTEs!");
+        assert_eq!(post.author, "clinte!");
+        assert_eq!(post.body, "Welcome to clinte! For usage, run 'clinte -h'");
     }
 }
