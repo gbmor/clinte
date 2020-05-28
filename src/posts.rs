@@ -1,9 +1,11 @@
 use std::io;
 
 use crate::db;
-use crate::ed;
 use crate::error;
 use crate::user;
+
+#[cfg(not(test))]
+use crate::ed;
 
 // Make sure nobody encodes narsty characters
 // into a message to negatively affect other
@@ -22,7 +24,13 @@ pub fn create() -> error::Result<()> {
     println!();
     println!("Title of the new post: ");
 
+    #[cfg(test)]
+    let title = String::from("TEST_TITLE");
+
+    #[cfg(not(test))]
     let mut title = String::new();
+
+    #[cfg(not(test))]
     io::stdin().read_line(&mut title)?;
 
     let title = str_to_utf8(title.trim());
@@ -34,14 +42,20 @@ pub fn create() -> error::Result<()> {
 
     println!();
 
+    #[cfg(not(test))]
     let body_raw = str_to_utf8(&ed::call(""));
+
+    #[cfg(not(test))]
     let body = if body_raw.len() > 500 {
         &body_raw[..500]
     } else {
         &body_raw
     };
-    let trimmed_body = body.trim();
 
+    #[cfg(test)]
+    let body = String::from("TEST_BODY");
+
+    let trimmed_body = body.trim();
     let user = &*user::NAME;
 
     let mut all = db::Posts::get_all(db::PATH);
@@ -214,6 +228,21 @@ mod tests {
         let post = all.get(0);
         assert_eq!(post.title, "TEST_TITLE");
         assert_eq!(post.body, "TEST_BODY");
+        fs::rename("clinte_bak.json", db::PATH).unwrap();
+    }
+
+    #[test]
+    fn test_create_delete() {
+        fs::copy(db::PATH, "clinte_bak.json").unwrap();
+        create().unwrap();
+        let all = db::Posts::get_all(db::PATH);
+        let post = all.get(1);
+
+        assert_eq!(post.title, "TEST_TITLE");
+        assert_eq!(post.body, "TEST_BODY");
+
+        delete_handler(2).unwrap();
+
         fs::rename("clinte_bak.json", db::PATH).unwrap();
     }
 }

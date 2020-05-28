@@ -1,10 +1,15 @@
-use std::env;
 use std::fs;
+
+#[cfg(not(test))]
+use std::env;
+#[cfg(not(test))]
 use std::process;
 
 use chrono::prelude::*;
 
+#[cfg(not(test))]
 use crate::error;
+
 use crate::user;
 
 fn create_tmp_file() -> Result<String, std::io::Error> {
@@ -16,6 +21,7 @@ fn create_tmp_file() -> Result<String, std::io::Error> {
     }
 }
 
+#[cfg(not(test))]
 pub fn call(body: &str) -> String {
     // If they don't have $EDITOR set, just default to nano
     // instead of assuming vim or emacs.
