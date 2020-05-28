@@ -8,6 +8,9 @@ os:
 
 dist: bionic
 
+env:
+  - RUST_TEST_THREADS=1
+
 addons:
   apt:
     packages:
