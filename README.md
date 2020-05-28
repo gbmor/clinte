@@ -42,11 +42,11 @@ $ sudo make install
 
 **Note:** v1.0.0 used sqlite3, which presented some issues. v2.0.0 uses a json structure for posts,
 as this will be safer on a multi-user system. When upgrading from v1.0.0 to v2.0.0, you won't be
-able to save your posts without using a third-party tool to dump the `posts` table to json, and
+able to save the posts without using a third-party tool to dump the `posts` table to json, and
 manually adjusting it to fit the expected format (which can be seen in the included `clinte.json`).
 
-*If upgrading from v1.0.0 -> v2.0.0, do a fresh install. The following applies to upgrading when
-already running at least v2.0.0*
+*If upgrading from v1.0.0 -> v2.0.0, do a fresh install, including removing the database directory 
+`/usr/local/clinte`. The following applies to upgrading when already running at least v2.0.0*
 
 ```
 $ make update
@@ -111,4 +111,5 @@ Use this flag if something's going wrong. Additional information will be written
 
 ## Notes
 
-The file where the posts are stored must be writeable by all users on the system. Keep this in mind.
+The file where the posts are stored, `/usr/local/clinte/clinte.json`, must be writeable by all
+users on the system. Keep this in mind.
