@@ -107,7 +107,15 @@ If the `[id]` argument is absent,  `clinte` asks for the numeric ID of the post 
 $ clinte -v [post|update|delete] [id]
 ```
 Use this flag if something's going wrong. Additional information will be written to
-`/tmp/clinte_$USER.log` that will, hopefully, reveal the cause of the error.
+`/tmp/clinte_$USER.log** that will, hopefully, reveal the cause of the error.
+
+**Line Wrapping**
+
+```
+$ clinte -l 80
+```
+
+Wraps posts at the given line length. Set to <10 to disable line wrapping. Defaults to 80.
 
 ## Notes
 
