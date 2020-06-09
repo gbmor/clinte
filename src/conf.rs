@@ -16,6 +16,14 @@ fn get_config() -> clap::ArgMatches<'static> {
                 .long("verbose")
                 .help("Verbose logging"),
         )
+        .arg(
+            Arg::with_name("line")
+                .short("l")
+                .long("line")
+                .value_name("LENGTH")
+                .takes_value(true)
+                .help("Line length (default: 80; a value <10 disables wrapping)"),
+        )
         .subcommand(clap::SubCommand::with_name("post").about("Post a new notice"))
         .subcommand(
             clap::SubCommand::with_name("update")

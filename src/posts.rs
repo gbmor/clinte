@@ -1,5 +1,6 @@
 use std::io;
 
+use crate::conf;
 use crate::db;
 use crate::error;
 use crate::user;
@@ -74,16 +75,38 @@ pub fn create() -> error::Result<()> {
 
 // Shows the most recent posts.
 pub fn display() -> error::Result<()> {
+    let args = &*conf::ARGS;
+    let line_len = args
+        .value_of("line")
+        .unwrap_or_else(|| "80")
+        .parse::<usize>()
+        .unwrap_or_else(|_| 80);
+
     let all = db::Posts::get_all(db::PATH);
 
     let mut postvec = Vec::new();
     all.posts().iter().enumerate().for_each(|(id, post)| {
+        let body = post
+            .body
+            .trim()
+            .chars()
+            .into_iter()
+            .enumerate()
+            .map(|(i, e)| {
+                let i = i + 1;
+                if line_len > 9 && i % line_len == 0 {
+                    return format!("{}\n", e);
+                }
+                e.to_string()
+            })
+            .collect::<String>();
+
         let newpost = format!(
             "{}. {} -> by {}\n{}\n\n",
             id + 1,
             post.title.trim(),
             post.author,
-            post.body.trim()
+            body
         );
         postvec.push(newpost);
     });
