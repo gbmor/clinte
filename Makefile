@@ -4,9 +4,6 @@ BINDIR?=$(_INSTDIR)/bin
 DBDIR?=$(_INSTDIR)/clinte
 
 clinte:
-	@printf "\n%s\n" "Checking out latest tag..."
-	git checkout $(git describe --tags --abbrev=0)
-
 	@printf "\n%s\n" "Building clinte. This may take a minute or two."
 	cargo build --release
 	@printf "\n%s\n" "...Done!"
@@ -24,10 +21,10 @@ update:
 
 	@printf "\n%s\n" "Updating from upstream repository..."
 	git pull --rebase
-	
+
 	@printf "\n%s\n" "Checking out latest tag..."
 	git checkout $(git describe --tags --abbrev=0)
-	
+
 	@printf "\n%s\n" "...Done!"
 
 .PHONY: install
@@ -39,7 +36,7 @@ install:
 	@printf "\n%s\n" "Copying files..."
 	install -m755 target/release/clinte $(BINDIR)
 	install -m666 clinte.json $(DBDIR)
-	
+
 	@printf "\n%s\n" "...Done!"
 
 .PHONY: upgrade
