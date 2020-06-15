@@ -21,10 +21,6 @@ fn main() {
     println!("a community notices system");
     println!();
 
-    if *conf::DEBUG {
-        log::info!("Startup completed in {:?}ms", start.elapsed().as_millis());
-    }
-
     if arg_matches.subcommand_matches("post").is_some() {
         log::info!("New post...");
         error::helper(posts::create(), "Error creating new post");
@@ -57,4 +53,8 @@ fn main() {
     }
 
     error::helper(posts::display(), "Error displaying posts");
+
+    if *conf::DEBUG {
+        log::info!("Run completed in {:?}ms", start.elapsed().as_millis());
+    }
 }
