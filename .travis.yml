@@ -11,19 +11,6 @@ dist: bionic
 env:
   - RUST_TEST_THREADS=1
 
-addons:
-  apt:
-    packages:
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
-      - libsqlcipher-dev
-      - libsqlcipher0
-      - cmake
-      - gcc
-      - binutils-dev
-      - libiberty-dev
-
 before_script:
     - bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
 
