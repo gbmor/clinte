@@ -1,0 +1,13 @@
+image: alpine/edge
+packages:
+  - rust
+  - cargo
+sources:
+  - https://git.sr.ht/~gbmor/clinte
+environment:
+  RUST_TEST_THREADS: 1
+tasks:
+  - build: |
+      cd clinte
+      cargo test
+      cargo build
