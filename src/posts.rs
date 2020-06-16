@@ -83,6 +83,7 @@ pub fn display() -> error::Result<()> {
         .unwrap_or_else(|_| 80);
 
     let all = db::Posts::get_all(db::PATH);
+    all.hash()?;
 
     let mut postvec = Vec::new();
     all.posts().iter().enumerate().for_each(|(id, post)| {
@@ -90,7 +91,6 @@ pub fn display() -> error::Result<()> {
             .body
             .trim()
             .chars()
-            .into_iter()
             .enumerate()
             .map(|(i, e)| {
                 let i = i + 1;
