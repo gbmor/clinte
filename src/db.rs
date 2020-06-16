@@ -68,7 +68,12 @@ impl Posts {
         hasher.update(body);
         let hash = format!("{:x}", hasher.finalize());
     
+        #[cfg(test)]
+        let homedir = std::env::var("PWD")?;
+
+        #[cfg(not(test))]
         let homedir = std::env::var("HOME")?;
+        
         let writepath = format!("{}/.clinte.sha256", homedir);
         fs::write(writepath, &hash)?;
 
@@ -162,5 +167,23 @@ mod tests {
 
         all.delete(1);
         all.write();
+    }
+
+    #[test]
+    fn check_hash() {
+        let strposts = fs::read_to_string(PATH).unwrap();
+        let mut hasher = Sha256::new();
+        hasher.update(strposts);
+        let rhs = format!("{:x}", hasher.finalize());
+
+        let all = Posts::get_all(PATH);
+        all.hash().unwrap();
+
+        let pwd = std::env::var("PWD").unwrap();
+        let hashpath = format!("{}/.clinte.sha256", pwd);
+        let lhs = fs::read_to_string(hashpath.clone()).unwrap();
+        fs::remove_file(hashpath).unwrap();
+
+        assert_eq!(lhs, rhs);
     }
 }
