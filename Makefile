@@ -35,14 +35,9 @@ install:
 
 	@printf "\n%s\n" "Copying files..."
 	install -m755 target/release/clinte $(BINDIR)
-	install -m666 clinte.json $(DBDIR)
 
-	@printf "\n%s\n" "...Done!"
+	@if [ -f "$(DBDIR)/clinte.json" ]; then printf "\n%s\n" "clinte.json exists. Skipping ..."; else install -m666 clinte.json "$(DBDIR)"; fi
 
-.PHONY: upgrade
-upgrade:
-	@printf "\n%s\n" "Upgrading clinte..."
-	install -m755 target/release/clinte $(BINDIR)
 	@printf "\n%s\n" "...Done!"
 
 .PHONY: test
