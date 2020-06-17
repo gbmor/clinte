@@ -51,5 +51,6 @@ test:
 uninstall:
 	@printf "\n%s\n" "Uninstalling clinte..."
 	rm -f $(BINDIR)/clinte
+	@if [ -e /etc/profile.d ]; then printf "%s\n" "rm -f /etc/profile.d/check_new_clinte_posts.sh" && rm -f /etc/profile.d/check_new_clinte_posts.sh; fi
 	@printf "\n%s\n" "...Done!"
-	@printf "%s %s\n" "The database is still intact in" $(DBDIR)
+	@printf "%s %s\n" "The posts are still intact in" $(DBDIR)
