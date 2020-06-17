@@ -8,5 +8,5 @@ DBFILE_HASH=$(sha256sum "$DBFILE" | cut -d' ' -f1)
 
 if [ "$LOCAL_HASH" != "$DBFILE_HASH" ]
 then
-    printf "%s\n" "New posts on clinte!"
+    printf "%s\n\n" "New posts on clinte!"
 fi
