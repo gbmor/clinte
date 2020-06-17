@@ -1,10 +1,18 @@
 #!/bin/sh
 
-LOCAL_FILE="$HOME/.clinte.json"
-LOCAL_HASH=$(sha256sum "$LOCAL_FILE" 2>/dev/null | cut -d' ' -f1)
+OS=$(uname)
 
+LOCAL_FILE="$HOME/.clinte.json"
 DBFILE="/usr/local/clinte/clinte.json"
-DBFILE_HASH=$(sha256sum "$DBFILE" | cut -d' ' -f1)
+
+if [ $OS = "Linux" ]
+then
+    LOCAL_HASH=$(sha256sum "$LOCAL_FILE" 2>/dev/null | cut -d' ' -f1)
+    DBFILE_HASH=$(sha256sum "$DBFILE" | cut -d' ' -f1)
+else
+    LOCAL_HASH=$(sha256 "$LOCAL_FILE" 2>/dev/null | cut -d' ' -f1)
+    DBFILE_HASH=$(sha256 "$DBFILE" | cut -d' ' -f1)
+fi
 
 if [ "$LOCAL_HASH" != "$DBFILE_HASH" ]
 then
