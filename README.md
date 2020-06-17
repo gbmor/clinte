@@ -36,8 +36,6 @@ $ make
 $ sudo make install
 ```
 
-`make` will automatically checkout the latest tag and build from there.
-
 ## Upgrading
 
 **Note:** v1.0.0 used sqlite3, which presented some issues. v2.x uses a json structure for posts,
