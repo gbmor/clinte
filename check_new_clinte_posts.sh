@@ -1,7 +1,7 @@
 #!/bin/sh
 
 LOCAL_FILE="$HOME/.clinte.json"
-LOCAL_HASH=$(sha256sum "$LOCAL_FILE" | cut -d' ' -f1)
+LOCAL_HASH=$(sha256sum "$LOCAL_FILE" 2>/dev/null | cut -d' ' -f1)
 
 DBFILE="/usr/local/clinte/clinte.json"
 DBFILE_HASH=$(sha256sum "$DBFILE" | cut -d' ' -f1)
