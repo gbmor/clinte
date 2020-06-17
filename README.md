@@ -1,4 +1,4 @@
-# clinte &nbsp; [![Build Status](https://travis-ci.com/gbmor/clinte.svg?branch=master)](https://travis-ci.com/gbmor/clinte) [![codecov](https://codecov.io/gh/gbmor/clinte/branch/master/graph/badge.svg)](https://codecov.io/gh/gbmor/clinte)
+# clinte &nbsp; [![builds.sr.ht status](https://builds.sr.ht/~gbmor/clinte.svg)](https://builds.sr.ht/~gbmor/clinte?) [![Build Status](https://travis-ci.com/gbmor/clinte.svg?branch=master)](https://travis-ci.com/gbmor/clinte) [![codecov](https://codecov.io/gh/gbmor/clinte/branch/master/graph/badge.svg)](https://codecov.io/gh/gbmor/clinte)
 
 Command-line community notice board for public-access UNIX systems. Post text-only notes for other users to see.
 
@@ -119,3 +119,8 @@ Wraps posts at the given line length. Set to <10 to disable line wrapping. Defau
 
 The file where the posts are stored, `/usr/local/clinte/clinte.json`, must be writeable by all
 users on the system. Keep this in mind.
+
+The main project is at [sr.ht/~gbmor/clinte](https://sr.ht/~gbmor/clinte), with a mirror at
+[github.com/gbmor/clinte](https://github.com/gbmor/clinte). Please send patches to
+[~gbmor/clinte@lists.sr.ht](mailto:~gbmor/clinte@lists.sr.ht). For more info on this workflow,
+check out [git send-email](https://git-send-email.io)
