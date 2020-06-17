@@ -1,5 +1,8 @@
 use std::io;
 
+#[cfg(not(test))]
+use std::{env, fs};
+
 use crate::conf;
 use crate::db;
 use crate::error;
@@ -83,7 +86,6 @@ pub fn display() -> error::Result<()> {
         .unwrap_or_else(|_| 80);
 
     let all = db::Posts::get_all(db::PATH);
-    all.hash()?;
 
     let mut postvec = Vec::new();
     all.posts().iter().enumerate().for_each(|(id, post)| {
@@ -115,6 +117,19 @@ pub fn display() -> error::Result<()> {
         if (postvec.len() > 14 && i >= postvec.len() - 15) || postvec.len() < 15 {
             print!("{}", e);
         }
+    }
+
+    // copy the json file to the user's home directory
+    // so it can be compared to the global file to check
+    // for new posts.
+    // previously, I'd hashed it, but I feel like it's
+    // better to leave the hashing to UNIX utilities
+    // than to add a heavy-ish dependency.
+    #[cfg(not(test))]
+    {
+        let homedir = env::var("HOME")?;
+        let localdest = format!("{}/.clinte.json", homedir);
+        fs::copy(db::PATH, localdest)?;
     }
 
     Ok(())

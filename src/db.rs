@@ -1,6 +1,5 @@
 use fd_lock::FdLock;
 use serde::{Deserialize, Serialize};
-use sha2::{Sha256, Digest};
 
 use std::fs;
 use std::fs::File;
@@ -57,27 +56,6 @@ impl Posts {
         let out: Self = error::helper(serde_json::from_str(&strdata), "Couldn't parse clinte.json");
 
         out
-    }
-
-    // Hash the contents of clinte.json and store it in your
-    // home directory. Useful for determining if there are
-    // new posts.
-    pub fn hash(&self) -> error::Result<()> {
-        let body = error::helper(serde_json::to_string_pretty(&self), "Couldn't reserialize json to record hash");
-        let mut hasher = Sha256::new();
-        hasher.update(body);
-        let hash = format!("{:x}", hasher.finalize());
-    
-        #[cfg(test)]
-        let homedir = std::env::var("PWD")?;
-
-        #[cfg(not(test))]
-        let homedir = std::env::var("HOME")?;
-        
-        let writepath = format!("{}/.clinte.sha256", homedir);
-        fs::write(writepath, &hash)?;
-
-        Ok(())
     }
 
     pub fn replace(&mut self, n: usize, post: Post) {
@@ -167,23 +145,5 @@ mod tests {
 
         all.delete(1);
         all.write();
-    }
-
-    #[test]
-    fn check_hash() {
-        let strposts = fs::read_to_string(PATH).unwrap();
-        let mut hasher = Sha256::new();
-        hasher.update(strposts);
-        let rhs = format!("{:x}", hasher.finalize());
-
-        let all = Posts::get_all(PATH);
-        all.hash().unwrap();
-
-        let pwd = std::env::var("PWD").unwrap();
-        let hashpath = format!("{}/.clinte.sha256", pwd);
-        let lhs = fs::read_to_string(hashpath.clone()).unwrap();
-        fs::remove_file(hashpath).unwrap();
-
-        assert_eq!(lhs, rhs);
     }
 }

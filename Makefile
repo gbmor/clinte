@@ -37,6 +37,7 @@ install:
 	install -m755 target/release/clinte $(BINDIR)
 
 	@if [ -f "$(DBDIR)/clinte.json" ]; then printf "\n%s\n" "clinte.json exists. Skipping ..."; else install -m666 clinte.json "$(DBDIR)"; fi
+	@if [ -e /etc/profile.d ]; then printf "%s\n" "Installing check_new_clinte_posts.sh to /etc/profile.d" && install -m644 check_new_clinte_posts.sh /etc/profile.d/; fi
 
 	@printf "\n%s\n" "...Done!"
 
