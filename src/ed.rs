@@ -12,6 +12,8 @@ use crate::error;
 
 use crate::user;
 
+// Creates a temporary file to call $EDITOR on. Returns the
+// path to the file on success.
 fn create_tmp_file() -> Result<String, std::io::Error> {
     let the_time = Utc::now().to_rfc3339();
     let file_name = format!("/tmp/clinte_ed_{}_{}", *user::NAME, the_time);
@@ -21,6 +23,7 @@ fn create_tmp_file() -> Result<String, std::io::Error> {
     }
 }
 
+// This calls $EDITOR and pre-fills it with the provided text.
 #[cfg(not(test))]
 pub fn call(body: &str) -> String {
     // If they don't have $EDITOR set, just default to nano
@@ -28,9 +31,9 @@ pub fn call(body: &str) -> String {
     let editor = match env::var("EDITOR") {
         Ok(ed) => {
             if &ed == "" {
-                "nano".into()
+                "nano".trim().to_string()
             } else {
-                ed
+                ed.trim().to_string()
             }
         }
         Err(_) => {
@@ -46,14 +49,36 @@ pub fn call(body: &str) -> String {
         "Couldn't populate tempfile with message",
     );
 
-    error::helper(
-        process::Command::new(editor)
-            .arg(&tmp_loc)
-            .stdin(process::Stdio::inherit())
-            .stdout(process::Stdio::inherit())
-            .output(),
-        "Couldn't call editor",
-    );
+    // Check if $EDITOR contains flags. Change the way we call $EDITOR if so,
+    // because otherwise it will explode.
+    if editor.contains(" ") {
+        let ed_split = editor.split_whitespace().collect::<Vec<&str>>();
+        let mut args = vec![];
+        ed_split.iter().enumerate().for_each(|(i, e)| {
+            if i == 0 {
+                return;
+            }
+            args.push(e.to_string());
+        });
+        args.push(tmp_loc.clone());
+        error::helper(
+            process::Command::new(ed_split[0])
+                .args(&args)
+                .stdin(process::Stdio::inherit())
+                .stdout(process::Stdio::inherit())
+                .output(),
+            "Couldn't call editor",
+        );
+    } else {
+        error::helper(
+            process::Command::new(editor)
+                .arg(&tmp_loc)
+                .stdin(process::Stdio::inherit())
+                .stdout(process::Stdio::inherit())
+                .output(),
+            "Couldn't call editor",
+        );
+    }
 
     let body = error::helper(
         fs::read_to_string(&tmp_loc),

@@ -103,7 +103,7 @@ dependencies = [
 
 [[package]]
 name = "clinte"
-version = "2.1.2"
+version = "2.1.3"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
