@@ -9,5 +9,5 @@ environment:
 tasks:
   - build: |
       cd clinte
+      cargo check
       cargo test
-      cargo build
