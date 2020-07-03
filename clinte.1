@@ -1,0 +1,108 @@
+.Dd July 3, 2020
+.Dt CLINTE 1
+.Os
+.Sh NAME
+.Nm clinte
+.Nd Command-line community notes board - CLI NoTEs
+.Sh SYNOPSIS
+.Nm
+.Op Fl v
+.Op Fl l Ar length
+.Op post
+.Op update Ar id
+.Op delete Ar id
+.
+.Sh DESCRIPTION
+.Nm
+is a command-line community notes board, aimed at public-access UNIX systems.
+Users may append a note, which is automatically tagged with their username.
+Other users may view all notes, but users may only edit or delete their own.
+Upon login, users are notified of unseen notes.
+.Pp
+All flags and commands are optional.
+The default behavior is to display the 15 most recent posts.
+.Pp
+Subject lines are truncated to 50 characters.
+Post bodies are truncated to 500 characters.
+.Pp
+When creating a new post or editing a previous post,
+.Ev $EDITOR
+is called.
+If
+.Ev $EDITOR
+is not set,
+.Xr nano 1
+is called.
+.
+.Ss Flags
+.Bl -tag -width Ds
+.It Fl v
+Verbose logging.
+If there's an error, hopefully something useful will be included in
+.Pa /tmp/clinte_$USER.log
+.It Fl l Ar length
+Specify the line length for wrapping post bodies.
+Defaults to 80.
+If the value passed is below 10, line wrapping will be disabled.
+.El
+.
+.Ss Commands
+.Bl -tag -width Ds
+.It Cm post
+Compose a new post to add to the notes board.
+.
+.It Cm update Op Ar id
+Edit the post numbered
+.Ar id
+if it was previously composed by the user.
+If
+.Ar id
+is omitted, the user will be prompted for it.
+.
+.It Cm delete Op Ar id
+Remove a post numbered
+.Ar id
+if it was previously composed by the user.
+If
+.Ar id
+is omitted, the user will be prompted for it.
+.El
+.
+.Ss Files
+Posts are stored chronologically in a file located at
+.Pa /usr/local/clinte/clinte.json
+.Pp
+The format of the file is as follows:
+.
+.Bd -literal -offset indent
+{
+    "posts": [
+        {
+            "title": "sample title",
+            "author": "sample author",
+            "body": "sample body"
+        }
+    ]
+}
+.Ed
+.
+.
+.Ss Notifications
+.Nm
+installs a script to
+.Pa /etc/profile.d/
+which notifies you of unseen posts upon logging in.
+However, some people may find this behavior to be annoying.
+To suppress notifications,
+.Xr touch 1
+.Pa $HOME/.hushclinte .
+.Sh AUTHORS
+.An gbmor Aq Mt ben@gbmor.dev
+.Sh BUGS
+Send a message to the mailing list:
+.Mt ~gbmor/clinte@lists.sr.ht
+.Pp
+You may also open a ticket at:
+.Lk https://todo.sr.ht/~gbmor/clinte
+.Pp
+Or, /msg gbmor on tilde.chat or freenode.

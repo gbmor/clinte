@@ -34,10 +34,12 @@ install:
 	mkdir -p $(DBDIR)
 
 	@printf "\n%s\n" "Copying files..."
-	install -m755 target/release/clinte $(BINDIR)
+	install -m755 -o root -g root target/release/clinte $(BINDIR)
 
-	@if [ -f "$(DBDIR)/clinte.json" ]; then printf "\n%s\n" "clinte.json exists. Skipping ..."; else install -m666 clinte.json "$(DBDIR)"; fi
-	@if [ -e /etc/profile.d ]; then printf "%s\n" "Installing check_new_clinte_posts.sh to /etc/profile.d" && install -m644 check_new_clinte_posts.sh /etc/profile.d/; fi
+	@if [ -f "$(DBDIR)/clinte.json" ]; then printf "\n%s\n" "clinte.json exists. Skipping ..."; else install -m666 -o root -g root clinte.json "$(DBDIR)"; fi
+	@if [ -e /etc/profile.d ]; then printf "%s\n" "Installing check_new_clinte_posts.sh to /etc/profile.d" && install -m644 -o root -g root check_new_clinte_posts.sh /etc/profile.d/; fi
+
+	install -m644 -o root -g root clinte.1 $(PREFIX)/share/man/man1/
 
 	@printf "\n%s\n" "...Done!"
 
@@ -51,6 +53,7 @@ test:
 uninstall:
 	@printf "\n%s\n" "Uninstalling clinte..."
 	rm -f $(BINDIR)/clinte
+	rm -f $(PREFIX)/share/man/man1/clinte.1
 	@if [ -e /etc/profile.d ]; then printf "%s\n" "rm -f /etc/profile.d/check_new_clinte_posts.sh" && rm -f /etc/profile.d/check_new_clinte_posts.sh; fi
 	@printf "\n%s\n" "...Done!"
 	@printf "%s %s\n" "The posts are still intact in" $(DBDIR)
