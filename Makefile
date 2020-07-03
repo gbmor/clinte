@@ -14,34 +14,9 @@ clean:
 	cargo clean
 	@printf "\n%s\n" "...Done!"
 
-.PHONY: update
-update:
-	@printf "\n%s\n" "Making sure we're on master..."
-	git checkout master
-
-	@printf "\n%s\n" "Updating from upstream repository..."
-	git pull --rebase
-
-	@printf "\n%s\n" "Checking out latest tag..."
-	git checkout $(git describe --tags --abbrev=0)
-
-	@printf "\n%s\n" "...Done!"
-
 .PHONY: install
 install:
-	@printf "\n%s\n" "Installing clinte..."
-	@printf "\n%s\n" "Creating directories..."
-	mkdir -p $(DBDIR)
-
-	@printf "\n%s\n" "Copying files..."
-	install -m755 -o root -g root target/release/clinte $(BINDIR)
-
-	@if [ -f "$(DBDIR)/clinte.json" ]; then printf "\n%s\n" "clinte.json exists. Skipping ..."; else install -m666 -o root -g root clinte.json "$(DBDIR)"; fi
-	@if [ -e /etc/profile.d ]; then printf "%s\n" "Installing check_new_clinte_posts.sh to /etc/profile.d" && install -m644 -o root -g root check_new_clinte_posts.sh /etc/profile.d/; fi
-
-	install -m644 -o root -g root clinte.1 $(PREFIX)/share/man/man1/
-
-	@printf "\n%s\n" "...Done!"
+	@sh install.sh $(PREFIX)
 
 .PHONY: test
 test:
