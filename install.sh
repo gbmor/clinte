@@ -34,7 +34,7 @@ else
     install -m666 -o root -g "$FILEGRP" clinte.json "$DBDIR"
 fi
 
-if [ -e /etc/profile.d ]; then
+if [ -d /etc/profile.d ]; then
     printf '%s\n' 'Installing check_new_clinte_posts.sh to /etc/profile.d'
     install -m644 -o root -g "$FILEGRP" check_new_clinte_posts.sh /etc/profile.d/
 fi
