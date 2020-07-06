@@ -14,8 +14,8 @@ where
             if *conf::DEBUG {
                 log::error!("--> {:?}", err);
             }
-            //std::process::exit(1);
-            panic!("{:?}", err);
+            eprintln!("{}", simplified_message);
+            std::process::exit(1);
         }
     }
 }
