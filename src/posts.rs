@@ -132,6 +132,7 @@ pub fn display() -> error::Result<()> {
         fs::copy(db::PATH, localdest.clone())?;
         let mut perms = fs::metadata(&localdest)?.permissions();
         perms.set_mode(0o644);
+        fs::set_permissions(&localdest, perms)?;
     }
 
     Ok(())
