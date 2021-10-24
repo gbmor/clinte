@@ -1,7 +1,7 @@
 use std::io;
 
 #[cfg(not(test))]
-use std::{env, fs};
+use std::{env, fs, os::unix::fs::PermissionsExt};
 
 use crate::conf;
 use crate::db;
@@ -130,6 +130,8 @@ pub fn display() -> error::Result<()> {
         let homedir = env::var("HOME")?;
         let localdest = format!("{}/.clinte.json", homedir);
         fs::copy(db::PATH, localdest)?;
+        let mut perms = fs::metadata(&localdest)?.permissions();
+        perms.set_mode(0o644);
     }
 
     Ok(())
